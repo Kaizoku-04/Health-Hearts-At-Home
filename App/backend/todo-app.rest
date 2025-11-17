@@ -1,0 +1,65 @@
+### Signup
+POST http://192.168.1.155:4000/signup
+Content-Type: application/json
+
+{
+  "name": "Mohannad",
+  "email": "dodorapapah@gmail.com",
+  "password": "mypassword123"
+}
+
+### Login
+POST http://192.168.1.155:4000/login
+Content-Type: application/json
+
+{
+  "email": "dodorapapah@gmail.com",
+  "password": "16112004"
+}
+
+### Refresh Token
+POST http://192.168.1.155:4000/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEzLCJ0b2tlbklkIjoiYTI1NGRiNzItYzhiYi00ODBmLTkyOTAtNWNhZDM0ODc3OTJiIiwiaWF0IjoxNzYyNDIwMjEwLCJleHAiOjE3NjMwMjUwMTB9.jvlWBW_3rBbnYXiiy7wsNjZf5VHmeBwCEoHfTETPqpU"
+}
+
+### Protected Route: Get My Info (/me)
+GET http://192.168.1.155:4000/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEzLCJpYXQiOjE3NjI0MjcyNTMsImV4cCI6MTc2MjQyODE1M30.hykjSlONuK4nnotwTRjwys3DZExsAz76t-vw7cppu9w
+
+### Send Password Reset Code
+POST http://192.168.1.155:4000/send-reset-code
+Content-Type: application/json
+
+{
+  "email": "dodorapapah@gmail.com"
+}
+
+### Confirm Reset Code
+POST http://192.168.1.155:4000/verify-reset-code
+Content-Type: application/json
+
+{
+  "email": "dodorapapah@gmail.com",
+  "code": "135305"
+}
+
+### Confirm Password Reset
+POST http://192.168.1.155:4000/confirm-reset
+Content-Type: application/json
+
+{
+  "email": "dodorapapah@gmail.com",
+  "code": "135305",
+  "newPassword": "16112004"
+}
+
+### Logout
+POST http://192.168.1.155:4000/logout
+Content-Type: application/json
+
+{
+  "userId": 1
+}
