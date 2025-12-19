@@ -28,6 +28,10 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // ✅ Kotlin DSL syntax for Google Maps API key
+        val googleMapsKey = System.getenv("google_maps_android") ?: "YOUR_KEY"
+        resValue("string", "google_maps_api_key", googleMapsKey)
+        manifestPlaceholders["GOOGLE_MAPS_ANDROID_API_KEY"] = googleMapsKey
     }
 
     buildTypes {

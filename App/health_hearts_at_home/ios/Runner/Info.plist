@@ -45,5 +45,14 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+    <!-- ✅ Add Google Maps API Key -->
+    <!-- <key>GMSApiKey</key> -->
+     <!--  <string></string>maps API_KEY from .env -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs access to your location to show hospital maps</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app needs access to your location to show hospital maps</string>
+	<key>com.apple.developer.location.push</key>
+	<true/>
 </dict>
 </plist>

@@ -2,18 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'services/api_service.dart';
-import 'services/auth_service.dart';
-import 'pages/auth_page.dart';
+// import 'services/auth_service.dart';
+import 'services/app_service.dart';
+// import 'pages/auth_page.dart';
+import 'pages/home_page.dart';
 import 'models/themes.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
-  const baseUrl =
-      'http://192.168.1.155:4000'; // replace with your API base URL or move to config
+void main() async {
+  const baseUrl = 'http://192.168.1.155:4000';
+  await dotenv.load(fileName: ".env");
   runApp(
+    // MultiProvider(
+    //   providers: [
+    //     ChangeNotifierProvider(
+    //       create: (_) => AuthService(api: ApiService(baseUrl: baseUrl)),
+    //     ),
     ChangeNotifierProvider(
-      create: (_) => AuthService(api: ApiService(baseUrl: baseUrl)),
+      create: (_) => AppService(api: ApiService(baseUrl: baseUrl)),
       child: const MyApp(),
     ),
+    //   ],
+    //   child: const MyApp(),
+    // ),
   );
 }
 
@@ -41,6 +52,7 @@ class _MyApp extends State<MyApp> {
       useMaterial3: false,
       colorScheme: lightScheme,
       primarySwatch: customTheme,
+      scaffoldBackgroundColor: Colors.white,
     );
 
     final ThemeData darkTheme = ThemeData(
@@ -48,15 +60,20 @@ class _MyApp extends State<MyApp> {
       colorScheme: darkScheme,
       primarySwatch: customTheme,
       brightness: Brightness.dark,
+      scaffoldBackgroundColor: const Color(0xFF121212),
     );
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Auth Template',
+      title: 'CHD - Health Hearts at Home',
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: _isDark ? ThemeMode.dark : ThemeMode.light,
-      home: AuthGate(
+      // home: AuthGate(
+      //   onToggleTheme: () => setState(() => _isDark = !_isDark),
+      //   isDark: _isDark,
+      // ),
+      home: HomePage(
         onToggleTheme: () => setState(() => _isDark = !_isDark),
         isDark: _isDark,
       ),
@@ -64,82 +81,23 @@ class _MyApp extends State<MyApp> {
   }
 }
 
-/// Shows AuthPage when not signed in, basic LoggedInPage when signed in.
-class AuthGate extends StatelessWidget {
-  final VoidCallback onToggleTheme;
-  final bool isDark;
-  const AuthGate({
-    super.key,
-    required this.onToggleTheme,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final auth = context.watch<AuthService>();
-    if (auth.isLoggedIn) {
-      return LoggedInPage(onToggleTheme: onToggleTheme, isDark: isDark);
-    } else {
-      return AuthPage(onToggleTheme: onToggleTheme, isDark: isDark);
-    }
-  }
-}
-
-/// Minimal signed-in page used in the auth-only template.
-/// Replace with your full app navigation later.
-class LoggedInPage extends StatelessWidget {
-  final VoidCallback onToggleTheme;
-  final bool isDark;
-  const LoggedInPage({
-    super.key,
-    required this.onToggleTheme,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final auth = context.watch<AuthService>();
-    final user = auth.user;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Welcome'),
-        actions: [
-          IconButton(
-            onPressed: onToggleTheme,
-            icon: Icon(isDark ? Icons.dark_mode : Icons.light_mode),
-          ),
-          IconButton(
-            onPressed: () async {
-              await auth.logout();
-            },
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
-          ),
-        ],
-      ),
-      body: Center(
-        child: user == null
-            ? const CircularProgressIndicator()
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Hello, ${user.name.isNotEmpty ? user.name : user.email}',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 12),
-                  Text('Email: ${user.email}'),
-                  const SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await auth.logout();
-                    },
-                    child: const Text('Sign out'),
-                  ),
-                ],
-              ),
-      ),
-    );
-  }
-}
+// class AuthGate extends StatelessWidget {
+//   final VoidCallback onToggleTheme;
+//   final bool isDark;
+//
+//   const AuthGate({
+//     super.key,
+//     required this.onToggleTheme,
+//     required this.isDark,
+//   });
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final auth = context.watch<AuthService>();
+//     if (auth.isLoggedIn) {
+//       return HomePage(onToggleTheme: onToggleTheme, isDark: isDark);
+//     } else {
+//       return AuthPage(onToggleTheme: onToggleTheme, isDark: isDark);
+//     }
+//   }
+// }
