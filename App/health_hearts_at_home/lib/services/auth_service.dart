@@ -70,7 +70,7 @@ class AuthService extends ChangeNotifier {
     try {
       // 1) initialize GoogleSignIn (safe to call even if not using Google login)
       try {
-        await dotenv.load(fileName: "../.env");
+        await dotenv.load(fileName: "../../.env");
         await _googleSignIn.initialize(
           serverClientId: dotenv.env['serverClietId'],
         );
