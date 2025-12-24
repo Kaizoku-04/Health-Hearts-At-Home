@@ -38,9 +38,9 @@ class _HospitalMapsPageState extends State<HospitalMapsPage> {
       hospitalLocation = LocationData(
         latitude: 37.4419,
         longitude: -122.1430,
-        name: 'X University Hospital',
+        name: 'Loma Linda University Children\'s Hospital',
         description: 'Main Hospital Location',
-        address: '123 Medical Center Blvd, City, State 12345',
+        address: '11234 Anderson St, Loma Linda, CA 92354, USA',
         phone: '+1 (XXX) XXX-XXXX',
         website: 'https://xuhosp.com',
       );
