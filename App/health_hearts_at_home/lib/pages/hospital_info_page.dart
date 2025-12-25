@@ -22,27 +22,16 @@ class HospitalInfoPage extends StatefulWidget {
 }
 
 class _HospitalInfoPageState extends State<HospitalInfoPage> {
-  Map<String, dynamic>? hospitalInfo;
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadHospitalInfo();
-  }
-
-  Future<void> _loadHospitalInfo() async {
-    try {
-      final appService = context.read<AppService>();
-      final info = await appService.fetchHospitalInfo();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
-        hospitalInfo = info;
         isLoading = false;
       });
-    } catch (e) {
-      setState(() => isLoading = false);
-      debugPrint('Error loading hospital info: $e');
-    }
+    });
   }
 
   @override
@@ -52,87 +41,110 @@ class _HospitalInfoPageState extends State<HospitalInfoPage> {
 
     return Scaffold(
       appBar: CHDAppBar(
-        title: AppStrings.get('hospitalInfo', lang),
+        title: "Hospital Information",
         onToggleTheme: widget.onToggleTheme,
         isDark: widget.isDark,
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildInfoCard(
-                    title: AppStrings.get('hospitalName', lang),
-                    content: hospitalInfo?['name'] ?? 'X University Hospital',
-                    icon: Icons.local_hospital,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildContactCard(
-                    title: AppStrings.get('hospitalPhone', lang),
-                    content: hospitalInfo?['phone'] ?? '+1 (XXX) XXX-XXXX',
-                    icon: Icons.phone,
-                    onTap: () {
-                      URLLauncherService.makePhoneCall(
-                        hospitalInfo?['phone'] ?? '',
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _buildContactCard(
-                    title: AppStrings.get('hospitalEmail', lang),
-                    content: hospitalInfo?['email'] ?? 'info@xuhosp.com',
-                    icon: Icons.email,
-                    onTap: () {
-                      URLLauncherService.sendEmail(
-                        email: hospitalInfo?['email'] ?? '',
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _buildInfoCard(
-                    title: AppStrings.get('cafeteriaHours', lang),
-                    content: hospitalInfo?['cafeteriaHours'] ?? '6AM - 8PM',
-                    icon: Icons.restaurant,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildContactCard(
-                    title: AppStrings.get('hospitalWebsite', lang),
-                    content: hospitalInfo?['website'] ?? 'www.xuhosp.com',
-                    icon: Icons.language,
-                    onTap: () {
-                      URLLauncherService.openWebsite(
-                        hospitalInfo?['website'] ?? '',
-                      );
-                    },
-                  ),
-                  // Inside _buildContactCard or add a new button:
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: customTheme[500],
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Hospital Name Card
+            _buildInfoCard(
+              title: AppStrings.get('hospitalName', lang),
+              content: 'Loma Linda University Children\'s Hospital',
+              icon: Icons.local_hospital,
+            ),
+            const SizedBox(height: 16),
+            // Cafeteria Hours Card
+            _buildInfoCard(
+              title: AppStrings.get('cafeteriaHours', lang),
+              content: '6AM - 8PM',
+              icon: Icons.restaurant,
+            ),
+            const SizedBox(height: 16),
+
+            // Website Card
+            _buildContactCard(
+              title: AppStrings.get('hospitalWebsite', lang),
+              content: 'https://lluch.org/',
+              icon: Icons.language,
+              onTap: () {
+                URLLauncherService.openWebsite('https://lluch.org/');
+              },
+            ),
+            const SizedBox(height: 28),
+
+            // Website Card
+            _buildContactCard(
+              title: AppStrings.get('Heart Care Service Website', lang),
+              content: 'https://lluch.org/heart-care',
+              icon: Icons.monitor_heart,
+              onTap: () {
+                URLLauncherService.openWebsite('https://lluch.org/heart-care');
+              },
+            ),
+            const SizedBox(height: 28),
+
+            // Website Card
+            _buildContactCard(
+              title: AppStrings.get('Children\'s emergency room website', lang),
+              content: 'https://lluch.org/services/childrens-emergency-room',
+              icon: Icons.bedroom_child,
+              onTap: () {
+                URLLauncherService.openWebsite(
+                  'https://lluch.org/services/childrens-emergency-room',
+                );
+              },
+            ),
+            const SizedBox(height: 28),
+
+            // Website Card
+            _buildContactCard(
+              title: AppStrings.get('Children\'s emergency room website', lang),
+              content:
+                  'https://lluch.org/patients-families/patients/billing-insurance',
+              icon: Icons.bedroom_child,
+              onTap: () {
+                URLLauncherService.openWebsite(
+                  'https://lluch.org/patients-families/patients/billing-insurance',
+                );
+              },
+            ),
+            const SizedBox(height: 28),
+
+            // Map Button
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: customTheme[500],
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => HospitalMapsPage(
+                      isDark: widget.isDark,
+                      onToggleTheme: widget.onToggleTheme,
                     ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => HospitalMapsPage(
-                            isDark: widget.isDark,
-                            onToggleTheme: widget.onToggleTheme,
-                          ),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.map, color: Colors.white),
-                    label: const Text(
-                      'View Hospital Map',
-                      style: TextStyle(color: Colors.white),
-                    ),
                   ),
-                ],
+                );
+              },
+              icon: const Icon(Icons.map, size: 22),
+              label: const Text(
+                'View Hospital Map',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -142,33 +154,48 @@ class _HospitalInfoPageState extends State<HospitalInfoPage> {
     required IconData icon,
   }) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 3,
+      shadowColor: customTheme[500]?.withValues(alpha: 0.2),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(icon, color: customTheme[600], size: 32),
+            // Icon container with background
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: customTheme[500]?.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: customTheme[600], size: 28),
+            ),
             const SizedBox(width: 16),
+
+            // Text content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey,
+                      color: Colors.grey[600],
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
                     content,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.grey[900],
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -186,31 +213,63 @@ class _HospitalInfoPageState extends State<HospitalInfoPage> {
     required VoidCallback onTap,
   }) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        leading: Icon(icon, color: customTheme[600]),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              content,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-        trailing: Icon(Icons.arrow_forward, color: customTheme[500]),
+      elevation: 3,
+      shadowColor: customTheme[500]?.withValues(alpha: 0.2),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        splashColor: customTheme[500]?.withValues(alpha: 0.1),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              // Icon container
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: customTheme[500]?.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: customTheme[600], size: 24),
+              ),
+              const SizedBox(width: 16),
+
+              // Text content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[600],
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      content,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey[900],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // Arrow icon
+              Icon(Icons.arrow_forward_ios, color: customTheme[500], size: 16),
+            ],
+          ),
+        ),
       ),
     );
   }

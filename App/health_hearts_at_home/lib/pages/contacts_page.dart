@@ -21,27 +21,16 @@ class ContactsPage extends StatefulWidget {
 }
 
 class _ContactsPageState extends State<ContactsPage> {
-  List<Map<String, dynamic>> contacts = [];
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadContacts();
-  }
-
-  Future<void> _loadContacts() async {
-    try {
-      final appService = context.read<AppService>();
-      final loadedContacts = await appService.fetchContacts();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
-        contacts = loadedContacts;
         isLoading = false;
       });
-    } catch (e) {
-      setState(() => isLoading = false);
-      debugPrint('Error loading contacts: $e');
-    }
+    });
   }
 
   @override
@@ -57,18 +46,10 @@ class _ContactsPageState extends State<ContactsPage> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : contacts.isEmpty
-          ? Center(child: Text(AppStrings.get('noData', lang)))
-          : ListView.builder(
+          : ListView(
               padding: const EdgeInsets.all(16),
-              itemCount: contacts.length,
-              itemBuilder: (context, index) {
-                final contact = contacts[index];
-                final name = contact['name'] ?? 'Unknown';
-                final phone = contact['phone'];
-                final email = contact['email'];
-
-                return Card(
+              children: [
+                Card(
                   elevation: 2,
                   margin: const EdgeInsets.only(bottom: 12),
                   shape: RoundedRectangleBorder(
@@ -79,58 +60,108 @@ class _ContactsPageState extends State<ContactsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        // Phone
+                        _buildContactButton(
+                          icon: Icons.phone,
+                          label: '+1 909-558-8000',
+                          onPressed: () async {
+                            final success =
+                                await URLLauncherService.makePhoneCall(
+                                  '+1 909-558-8000',
+                                );
+                            if (!success && mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Could not make call'),
+                                ),
+                              );
+                            }
+                          },
                         ),
-                        const SizedBox(height: 12),
-                        // Phone button
-                        if (phone != null)
-                          _buildContactButton(
-                            icon: Icons.phone,
-                            label: phone,
-                            onPressed: () async {
-                              final success =
-                                  await URLLauncherService.makePhoneCall(phone);
-                              if (!success && mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Could not make call'),
-                                  ),
+                        const SizedBox(height: 8),
+
+                        // Email
+                        _buildContactButton(
+                          icon: Icons.email,
+                          label: 'info@xuhosp.com',
+                          onPressed: () async {
+                            final success = await URLLauncherService.sendEmail(
+                              email: 'info@xuhosp.com',
+                              subject: 'Inquiry from CHD App',
+                            );
+                            if (!success && mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Could not send email'),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Instagram
+                        _buildImageContactButton(
+                          assetPath: 'lib/assets/instagram.png',
+                          label: 'Instagram @LLUChildrens',
+                          onPressed: () async {
+                            final success =
+                                await URLLauncherService.openInstagram(
+                                  username: 'LLUChildrens',
                                 );
-                              }
-                            },
-                          ),
-                        if (phone != null && email != null)
-                          const SizedBox(height: 8),
-                        // Email button
-                        if (email != null)
-                          _buildContactButton(
-                            icon: Icons.email,
-                            label: email,
-                            onPressed: () async {
-                              final success =
-                                  await URLLauncherService.sendEmail(
-                                    email: email,
-                                    subject: 'Inquiry from CHD App',
-                                  );
-                              if (!success && mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Could not send email'),
-                                  ),
+                            if (!success && mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Could not open Instagram'),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Facebook
+                        _buildImageContactButton(
+                          assetPath: 'lib/assets/facebook.png',
+                          label: 'Facebook /LLUChildrens',
+                          onPressed: () async {
+                            final success =
+                                await URLLauncherService.openFacebook(
+                                  pagePath: 'LLUChildrens',
                                 );
-                              }
-                            },
-                          ),
+                            if (!success && mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Could not open Facebook'),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+
+                        // YouTube
+                        _buildImageContactButton(
+                          assetPath: 'lib/assets/youtube.png',
+                          label: 'YouTube @LLUChildrens',
+                          onPressed: () async {
+                            final success =
+                                await URLLauncherService.openYouTube(
+                                  url: 'https://www.youtube.com/@LLUHealth',
+                                );
+                            if (!success && mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Could not open YouTube'),
+                                ),
+                              );
+                            }
+                          },
+                        ),
                       ],
                     ),
                   ),
-                );
-              },
+                ),
+              ],
             ),
     );
   }
@@ -143,6 +174,24 @@ class _ContactsPageState extends State<ContactsPage> {
     return ListTile(
       dense: true,
       leading: Icon(icon, color: customTheme[600]),
+      title: Text(
+        label,
+        style: const TextStyle(fontSize: 14),
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: Icon(Icons.arrow_forward, color: customTheme[500], size: 18),
+      onTap: onPressed,
+    );
+  }
+
+  Widget _buildImageContactButton({
+    required String assetPath,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return ListTile(
+      dense: true,
+      leading: Image.asset(assetPath, width: 24, height: 24),
       title: Text(
         label,
         style: const TextStyle(fontSize: 14),

@@ -1,3 +1,15 @@
+import java.util.Properties
+
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) {
+        file.inputStream().use { load(it) }
+    }
+}
+
+val googleMapsApiKey: String = localProperties.getProperty("google_maps_android") ?: ""
+
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -20,18 +32,15 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.health_hearts_at_home"
+         applicationId = "com.example.health_hearts_at_home"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        // ✅ Kotlin DSL syntax for Google Maps API key
-        val googleMapsKey = System.getenv("google_maps_android") ?: "YOUR_KEY"
-        resValue("string", "google_maps_api_key", googleMapsKey)
-        manifestPlaceholders["GOOGLE_MAPS_ANDROID_API_KEY"] = googleMapsKey
+        manifestPlaceholders["google_maps_android"] = googleMapsApiKey 
+
     }
 
     buildTypes {

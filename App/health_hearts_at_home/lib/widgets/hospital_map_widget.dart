@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../models/themes.dart';
 import '../models/location_model.dart';
 
 class HospitalMapWidget extends StatefulWidget {
-  final LocationData hospitalLocation;
-  final List<LocationData> facilities; // nearby facilities
+  final LocationData selectedLocation;
 
-  const HospitalMapWidget({
-    super.key,
-    required this.hospitalLocation,
-    this.facilities = const [],
-  });
+  const HospitalMapWidget({super.key, required this.selectedLocation});
 
   @override
   State<HospitalMapWidget> createState() => _HospitalMapWidgetState();
@@ -21,6 +17,7 @@ class _HospitalMapWidgetState extends State<HospitalMapWidget> {
   late GoogleMapController mapController;
   final Set<Marker> _markers = {};
   final Set<Polyline> _polylines = {};
+  final secrets = dotenv.load(fileName: ".env");
 
   @override
   void initState() {
@@ -28,38 +25,40 @@ class _HospitalMapWidgetState extends State<HospitalMapWidget> {
     _addMarkers();
   }
 
+  @override
+  void didUpdateWidget(HospitalMapWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedLocation != widget.selectedLocation) {
+      mapController.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(
+            widget.selectedLocation.latitude,
+            widget.selectedLocation.longitude,
+          ),
+          17,
+        ),
+      );
+    }
+  }
+
   void _addMarkers() {
-    // Add hospital marker
+    _markers.clear();
+
+    // Add hospital marker (always)
     _markers.add(
       Marker(
-        markerId: MarkerId('hospital'),
+        markerId: const MarkerId('hospital'),
         position: LatLng(
-          widget.hospitalLocation.latitude,
-          widget.hospitalLocation.longitude,
+          widget.selectedLocation.latitude,
+          widget.selectedLocation.longitude,
         ),
         infoWindow: InfoWindow(
-          title: widget.hospitalLocation.name,
-          snippet: widget.hospitalLocation.description,
+          title: widget.selectedLocation.name,
+          snippet: widget.selectedLocation.description,
         ),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
       ),
     );
-
-    // Add facility markers
-    for (int i = 0; i < widget.facilities.length; i++) {
-      final facility = widget.facilities[i];
-      _markers.add(
-        Marker(
-          markerId: MarkerId('facility_$i'),
-          position: LatLng(facility.latitude, facility.longitude),
-          infoWindow: InfoWindow(
-            title: facility.name,
-            snippet: facility.description,
-          ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-        ),
-      );
-    }
   }
 
   @override
@@ -74,20 +73,11 @@ class _HospitalMapWidgetState extends State<HospitalMapWidget> {
             child: GoogleMap(
               onMapCreated: (controller) {
                 mapController = controller;
-                mapController.animateCamera(
-                  CameraUpdate.newLatLngZoom(
-                    LatLng(
-                      widget.hospitalLocation.latitude,
-                      widget.hospitalLocation.longitude,
-                    ),
-                    15,
-                  ),
-                );
               },
               initialCameraPosition: CameraPosition(
                 target: LatLng(
-                  widget.hospitalLocation.latitude,
-                  widget.hospitalLocation.longitude,
+                  widget.selectedLocation.latitude,
+                  widget.selectedLocation.longitude,
                 ),
                 zoom: 15,
               ),
@@ -100,8 +90,8 @@ class _HospitalMapWidgetState extends State<HospitalMapWidget> {
             ),
           ),
         ),
-
         const SizedBox(height: 16),
+
         // Info card
         Card(
           elevation: 2,
@@ -114,14 +104,14 @@ class _HospitalMapWidgetState extends State<HospitalMapWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.hospitalLocation.name,
+                  widget.selectedLocation.name,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
-                if (widget.hospitalLocation.address != null)
+                if (widget.selectedLocation.address != null)
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -133,7 +123,7 @@ class _HospitalMapWidgetState extends State<HospitalMapWidget> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          widget.hospitalLocation.address!,
+                          widget.selectedLocation.address!,
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey[700],

@@ -1,5 +1,4 @@
 class ContentItem {
-  final String id;
   final String title;
   final String description;
   final String category; // tutorials, spiritual, etc.
@@ -9,7 +8,6 @@ class ContentItem {
   final String language; // en or ar
 
   ContentItem({
-    required this.id,
     required this.title,
     required this.description,
     required this.category,
@@ -20,7 +18,6 @@ class ContentItem {
   });
 
   Map<String, dynamic> toJson() => {
-    'id': id,
     'title': title,
     'description': description,
     'category': category,
@@ -31,7 +28,6 @@ class ContentItem {
   };
 
   factory ContentItem.fromJson(Map<String, dynamic> json) => ContentItem(
-    id: json['id'],
     title: json['title'],
     description: json['description'],
     category: json['category'],

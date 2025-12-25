@@ -23,6 +23,7 @@ class HospitalMapsPage extends StatefulWidget {
 
 class _HospitalMapsPageState extends State<HospitalMapsPage> {
   LocationData? hospitalLocation;
+  LocationData? selectedLocation;
   List<LocationData> facilities = [];
   bool isLoading = true;
 
@@ -36,42 +37,51 @@ class _HospitalMapsPageState extends State<HospitalMapsPage> {
     try {
       // Example location data - Replace with actual API call
       hospitalLocation = LocationData(
-        latitude: 37.4419,
-        longitude: -122.1430,
+        latitude: 34.04944292612875,
+        longitude: -117.26320484661548,
         name: 'Loma Linda University Children\'s Hospital',
         description: 'Main Hospital Location',
-        address: '11234 Anderson St, Loma Linda, CA 92354, USA',
-        phone: '+1 (XXX) XXX-XXXX',
-        website: 'https://xuhosp.com',
+        address: '11234 Anderson St, Loma Linda, CA 92354, United States',
+        phone: '+1 909-558-8000',
+        website: 'https://lluch.org/',
       );
 
       // Example nearby facilities
       facilities = [
         LocationData(
-          latitude: 37.4420,
-          longitude: -122.1432,
-          name: 'Parking Lot A',
-          description: 'Visitor Parking',
+          latitude: 34.049213175257684,
+          longitude: -117.26533539527401,
+          name: 'Charging Station',
+          description: 'To charge electrical cars',
         ),
         LocationData(
-          latitude: 37.4417,
-          longitude: -122.1428,
-          name: 'Cafeteria',
-          description: 'Hospital Cafeteria',
+          latitude: 34.05078027303055,
+          longitude: -117.25936522742359,
+          name: 'Loma Linda Market',
+          description: '',
         ),
         LocationData(
-          latitude: 37.4421,
-          longitude: -122.1425,
-          name: 'Emergency Entrance',
-          description: 'Emergency Room',
+          latitude: 34.049127951141244,
+          longitude: -117.24238185816088,
+          name: 'Angelo\'s restaurant',
+          description: 'A kinda Healthy restaurant',
         ),
       ];
 
-      setState(() => isLoading = false);
+      setState(() {
+        selectedLocation = hospitalLocation;
+        isLoading = false;
+      });
     } catch (e) {
       setState(() => isLoading = false);
       debugPrint('Error loading location data: $e');
     }
+  }
+
+  void _selectLocation(LocationData location) {
+    setState(() {
+      selectedLocation = location;
+    });
   }
 
   @override
@@ -94,14 +104,13 @@ class _HospitalMapsPageState extends State<HospitalMapsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  HospitalMapWidget(
-                    hospitalLocation: hospitalLocation!,
-                    facilities: facilities,
-                  ),
+                  // Map with selected location
+                  HospitalMapWidget(selectedLocation: selectedLocation!),
                   const SizedBox(height: 24),
-                  // Nearby Facilities
+
+                  // Location Selection Buttons
                   Text(
-                    'Nearby Facilities',
+                    'Select Location',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -109,17 +118,42 @@ class _HospitalMapsPageState extends State<HospitalMapsPage> {
                     ),
                   ),
                   const SizedBox(height: 12),
+
+                  // Hospital Button
+                  ElevatedButton.icon(
+                    onPressed: () => _selectLocation(hospitalLocation!),
+                    icon: const Icon(Icons.local_hospital),
+                    label: Text(hospitalLocation!.name),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: selectedLocation == hospitalLocation
+                          ? customTheme[500]
+                          : Colors.grey[300],
+                      foregroundColor: selectedLocation == hospitalLocation
+                          ? Colors.white
+                          : Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Facilities Buttons
                   ...facilities.map((facility) {
-                    return Card(
-                      elevation: 1,
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: ListTile(
-                        leading: Icon(
-                          Icons.location_on,
-                          color: customTheme[600],
+                    final isSelected = selectedLocation == facility;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: ElevatedButton.icon(
+                        onPressed: () => _selectLocation(facility),
+                        icon: const Icon(Icons.location_on),
+                        label: Text(facility.name),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isSelected
+                              ? customTheme[500]
+                              : Colors.grey[300],
+                          foregroundColor: isSelected
+                              ? Colors.white
+                              : Colors.black,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
-                        title: Text(facility.name),
-                        subtitle: Text(facility.description),
                       ),
                     );
                   }),
