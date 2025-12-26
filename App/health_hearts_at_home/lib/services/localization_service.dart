@@ -1,6 +1,7 @@
 class AppStrings {
   static final Map<String, Map<String, String>> _strings = {
     'en': {
+      'addEntry': 'Add Entry',
       'appTitle': 'Health Hearts at Home',
       'home': 'Home',
       'generalChildcare': 'General Childcare',
@@ -50,6 +51,7 @@ class AppStrings {
       'childInfo': 'Child Information',
     },
     'ar': {
+      'addEntry': 'إضافة سجل',
       'appTitle': 'قلوب صحية في البيت',
       'home': 'الرئيسية',
       'generalChildcare': 'العناية العامة بالأطفال',
