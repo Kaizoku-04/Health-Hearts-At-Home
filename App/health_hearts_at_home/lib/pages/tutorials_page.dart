@@ -71,7 +71,7 @@ class _TutorialsPageState extends State<TutorialsPage> {
                 ],
               ),
             )
-          : appService.contentItems.isEmpty
+          : appService.tutorialsItems.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -86,12 +86,12 @@ class _TutorialsPageState extends State<TutorialsPage> {
               ),
             )
           : ListView.builder(
-              itemCount: appService.contentItems.length,
+              itemCount: appService.tutorialsItems.length,
               itemBuilder: (context, index) {
-                final tutorial = appService.contentItems[index];
+                final tutorial = appService.tutorialsItems[index];
                 return ContentCard(
                   title: tutorial.title,
-                  description: tutorial.description,
+                  description: tutorial.description!,
                   imageUrl: tutorial.imageUrl,
                   hasVideo: tutorial.videoUrl != null,
                   onTap: () {

@@ -288,6 +288,56 @@ class _TrackingInputWidgetState extends State<TrackingInputWidget> {
         alignLabelWithHint: maxLines > 1,
         prefixIcon: maxLines > 1
             ? Container(
+                margin: const EdgeInsets.only(bottom: 40),
+                child: Icon(icon, color: Colors.grey[500]),
+              )
+            : Icon(icon, color: Colors.grey[500]),
+        filled: true,
+        fillColor: fillColor,
+        labelStyle: TextStyle(color: Colors.grey[600]),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none, // Clean look
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.transparent),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: accentColor, width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+      ),
+    );
+  }
+
+  // --- HELPER: Custom Text Field ---
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required bool isDark,
+    required Color fillColor,
+    required Color textColor,
+    bool isNumber = false,
+    int maxLines = 1,
+    String? hintText,
+  }) {
+    return TextFormField(
+      controller: controller,
+      style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hintText,
+        alignLabelWithHint: maxLines > 1,
+        prefixIcon: maxLines > 1
+            ? Container(
             margin: const EdgeInsets.only(bottom: 40),
             child: Icon(icon, color: Colors.grey[500])
         )

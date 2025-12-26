@@ -1,47 +1,50 @@
 class ChildTracking {
   final String id;
   final String childId;
-  final String date;
+  final String recordedAt;
   final double? weight;
+  final String? note; // instead of notes
+
+  // keep feeding fields if you want, but they won’t be persisted until you add them to backend
   final int? feedingAmount;
-  final String? feedingType; // breast/bottle
+  final String? feedingType;
   final double? oxygenSaturation;
   final String? equipment;
-  final String? notes;
 
   ChildTracking({
     required this.id,
     required this.childId,
-    required this.date,
+    required this.recordedAt,
     this.weight,
+    this.note,
     this.feedingAmount,
     this.feedingType,
     this.oxygenSaturation,
     this.equipment,
-    this.notes,
   });
 
   Map<String, dynamic> toJson() => {
     'id': id,
     'childId': childId,
-    'date': date,
+    'recordedAt': recordedAt, // ✅ backend field
     'weight': weight,
+    'note': note, // ✅ backend field
+    // optional extras; backend ignores them unless you add columns
     'feedingAmount': feedingAmount,
     'feedingType': feedingType,
     'oxygenSaturation': oxygenSaturation,
     'equipment': equipment,
-    'notes': notes,
   };
 
   factory ChildTracking.fromJson(Map<String, dynamic> json) => ChildTracking(
     id: json['id'],
     childId: json['childId'],
-    date: json['date'],
+    recordedAt: json['recordedAt'], // ✅ from backend SELECT ... AS "recordedAt"
     weight: json['weight']?.toDouble(),
+    note: json['note'],
     feedingAmount: json['feedingAmount'],
     feedingType: json['feedingType'],
     oxygenSaturation: json['oxygenSaturation']?.toDouble(),
     equipment: json['equipment'],
-    notes: json['notes'],
   );
 }

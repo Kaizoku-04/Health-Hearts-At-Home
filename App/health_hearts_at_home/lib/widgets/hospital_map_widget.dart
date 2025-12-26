@@ -14,7 +14,7 @@ class HospitalMapWidget extends StatefulWidget {
 }
 
 class _HospitalMapWidgetState extends State<HospitalMapWidget> {
-   GoogleMapController? mapController;
+  GoogleMapController? mapController;
   final Set<Marker> _markers = {};
   final Set<Polyline> _polylines = {};
   final secrets = dotenv.load(fileName: ".env");
