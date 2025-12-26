@@ -166,7 +166,7 @@ class HomePage extends StatelessWidget {
                   label: AppStrings.get('caregiverSupport', lang),
                   subtitle: "Get help",
                   icon: Icons.favorite_border_rounded,
-                  accentColor: colorSupport, // come here
+                  accentColor: colorSupport,
                   isDark: isDark,
                   textColor: primaryText,
                   onTap: () => _navigateTo(context, CaregiverSupportPage(isDark: isDark, onToggleTheme: onToggleTheme)),
@@ -327,7 +327,7 @@ class HomePage extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.2), //come here
+                    color: accentColor.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: accentColor, size: 22),
