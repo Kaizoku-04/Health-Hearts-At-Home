@@ -31,7 +31,7 @@ class HomePage extends StatelessWidget {
     // Background:
     // Light Mode: 'Morning Sky' (EBF2FA) - A fresh, lively blue-white tint.
     // Dark Mode: Deep Black/Grey.
-    final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF5F5F7);
+    final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFFFE7E7EC);
 
     // Text:
     final primaryText = isDark ? Colors.white : const Color(0xFF1D1D1F);
@@ -47,10 +47,10 @@ class HomePage extends StatelessWidget {
     // Accent Colors
     final colorChildcare = const Color(0xFFE76F51);
     final colorTutorials = const Color(0xFF2A9D8F);
-    final colorHospital = const Color(0xFF264653);
-    final colorSupport = const Color(0xFFE9C46A);
+    final colorHospital  = const Color(0xFF5d9bb5);
+    final colorSupport   = const Color(0xFFe3b23e);
     final colorSpiritual = const Color(0xFF8E44AD);
-    final colorInfo = const Color(0xFF457B9D);
+    final colorInfo      = const Color(0xFF457B9D);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -81,7 +81,9 @@ class HomePage extends StatelessWidget {
 
           // Theme Toggle
           IconButton(
-            icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+            icon: Icon(
+              isDark ? Icons.light_mode : Icons.dark_mode,
+            ),
             color: primaryText,
             onPressed: onToggleTheme,
           ),
@@ -119,10 +121,7 @@ class HomePage extends StatelessWidget {
               subtitle: 'Monitor growth & milestones',
               icon: Icons.timeline_rounded,
               gradient: heroGradient,
-              onTap: () => _navigateTo(
-                context,
-                TrackChildPage(isDark: isDark, onToggleTheme: onToggleTheme),
-              ),
+              onTap: () => _navigateTo(context, TrackChildPage(isDark: isDark, onToggleTheme: onToggleTheme)),
             ),
 
             const SizedBox(height: 32),
@@ -140,13 +139,7 @@ class HomePage extends StatelessWidget {
                   accentColor: colorChildcare,
                   isDark: isDark,
                   textColor: primaryText,
-                  onTap: () => _navigateTo(
-                    context,
-                    GeneralChildcarePage(
-                      isDark: isDark,
-                      onToggleTheme: onToggleTheme,
-                    ),
-                  ),
+                  onTap: () => _navigateTo(context, GeneralChildcarePage(isDark: isDark, onToggleTheme: onToggleTheme)),
                 ),
                 _buildListRow(
                   context,
@@ -156,10 +149,7 @@ class HomePage extends StatelessWidget {
                   accentColor: colorTutorials,
                   isDark: isDark,
                   textColor: primaryText,
-                  onTap: () => _navigateTo(
-                    context,
-                    TutorialsPage(isDark: isDark, onToggleTheme: onToggleTheme),
-                  ),
+                  onTap: () => _navigateTo(context, TutorialsPage(isDark: isDark, onToggleTheme: onToggleTheme)),
                 ),
                 _buildListRow(
                   context,
@@ -169,13 +159,7 @@ class HomePage extends StatelessWidget {
                   accentColor: colorHospital,
                   isDark: isDark,
                   textColor: primaryText,
-                  onTap: () => _navigateTo(
-                    context,
-                    HospitalInfoPage(
-                      isDark: isDark,
-                      onToggleTheme: onToggleTheme,
-                    ),
-                  ),
+                  onTap: () => _navigateTo(context, HospitalInfoPage(isDark: isDark, onToggleTheme: onToggleTheme)),
                 ),
                 _buildListRow(
                   context,
@@ -185,13 +169,7 @@ class HomePage extends StatelessWidget {
                   accentColor: colorSupport,
                   isDark: isDark,
                   textColor: primaryText,
-                  onTap: () => _navigateTo(
-                    context,
-                    CaregiverSupportPage(
-                      isDark: isDark,
-                      onToggleTheme: onToggleTheme,
-                    ),
-                  ),
+                  onTap: () => _navigateTo(context, CaregiverSupportPage(isDark: isDark, onToggleTheme: onToggleTheme)),
                 ),
               ],
             ),
@@ -211,10 +189,7 @@ class HomePage extends StatelessWidget {
                   accentColor: colorSpiritual,
                   isDark: isDark,
                   textColor: primaryText,
-                  onTap: () => _navigateTo(
-                    context,
-                    SpiritualPage(isDark: isDark, onToggleTheme: onToggleTheme),
-                  ),
+                  onTap: () => _navigateTo(context, SpiritualPage(isDark: isDark, onToggleTheme: onToggleTheme)),
                 ),
                 _buildListRow(
                   context,
@@ -224,10 +199,7 @@ class HomePage extends StatelessWidget {
                   accentColor: colorInfo,
                   isDark: isDark,
                   textColor: primaryText,
-                  onTap: () => _navigateTo(
-                    context,
-                    AboutCHDPage(isDark: isDark, onToggleTheme: onToggleTheme),
-                  ),
+                  onTap: () => _navigateTo(context, AboutCHDPage(isDark: isDark, onToggleTheme: onToggleTheme)),
                 ),
                 _buildListRow(
                   context,
@@ -237,15 +209,144 @@ class HomePage extends StatelessWidget {
                   accentColor: colorInfo,
                   isDark: isDark,
                   textColor: primaryText,
-                  onTap: () => _navigateTo(
-                    context,
-                    ContactsPage(isDark: isDark, onToggleTheme: onToggleTheme),
-                  ),
+                  onTap: () => _navigateTo(context, ContactsPage(isDark: isDark, onToggleTheme: onToggleTheme)),
                 ),
               ],
             ),
             const SizedBox(height: 40),
           ],
+        ),
+      ),
+    );
+  }
+
+  // --- HELPERS ---
+
+  Widget _buildSectionHeader(String title, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w800,
+          color: isDark ? Colors.grey[500] : Colors.grey[600],
+          letterSpacing: 1.0,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroCard(BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Gradient gradient,
+    required VoidCallback onTap
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          gradient: gradient,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+                color: const Color(0xFF3A1C71).withOpacity(0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 6)
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: Colors.white, size: 30),
+            ),
+            const SizedBox(width: 18),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(subtitle, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildListRow(BuildContext context, {
+    required String label,
+    required String subtitle,
+    required IconData icon,
+    required Color accentColor,
+    required bool isDark,
+    required Color textColor,
+    required VoidCallback onTap
+  }) {
+    // Pure white cards on light mode, dark grey on dark mode
+    final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.withOpacity(isDark ? 0.1 : 0.05), width: 1),
+                boxShadow: [
+                  BoxShadow(
+                      color: const Color(0xFF3A1C71).withOpacity(isDark ? 0.0 : 0.03), // Subtle colored shadow for "liveliness"
+                      blurRadius: 10,
+                      offset: const Offset(0, 4)
+                  )
+                ]
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: accentColor.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: accentColor, size: 22),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textColor)),
+                      const SizedBox(height: 2),
+                      Text(subtitle, style: TextStyle(fontSize: 13, color: Colors.grey[500], fontWeight: FontWeight.w500)),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right, color: Colors.grey[300], size: 24),
+              ],
+            ),
+          ),
         ),
       ),
     );

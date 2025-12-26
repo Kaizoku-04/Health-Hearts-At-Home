@@ -25,18 +25,14 @@ class CHDAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       // Use the passed background color, or fall back to the default transparent/white
-      backgroundColor:
-          backgroundColor ?? (isDark ? Colors.grey[900] : Colors.white),
+      backgroundColor: backgroundColor ?? (isDark ? Colors.grey[900] : Colors.white),
       elevation: 0,
       centerTitle: true,
       leading: showBackButton
           ? IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios,
-                color: textColor ?? (isDark ? Colors.white : Colors.black),
-              ),
-              onPressed: () => Navigator.pop(context),
-            )
+        icon: Icon(Icons.arrow_back_ios, color: textColor ?? (isDark ? Colors.white : Colors.black)),
+        onPressed: () => Navigator.pop(context),
+      )
           : null,
       title: Text(
         title,

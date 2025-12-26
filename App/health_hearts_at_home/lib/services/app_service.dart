@@ -289,8 +289,7 @@ class AppService extends ChangeNotifier {
   }
 
   void setLanguage(String languageCode) {
-    _currentLanguage =
-        languageCode; // Or however you store your language variable
+    _currentLanguage = languageCode; // Or however you store your language variable
     notifyListeners(); // Important to update the UI
   }
 }

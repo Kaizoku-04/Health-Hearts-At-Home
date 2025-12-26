@@ -273,6 +273,18 @@ class _TrackChildPageState extends State<TrackChildPage> {
     final isDark = widget.isDark;
     final lang = context.read<AppService>().currentLanguage;
 
+    // --- DYNAMIC THEME CHECK ---
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // --- NEUTRAL PLATINUM PALETTE ---
+    final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF5F5F7);
+    final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final primaryText = isDark ? Colors.white : const Color(0xFF1D1D1F);
+    final secondaryText = isDark ? const Color(0xFFBDBDBD) : const Color(0xFF5A5A60);
+
+    // Hero Color (Royal Purple)
+    const accentColor = Color(0xFF3A1C71);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(AppStrings.get('trackChild', lang)),
@@ -337,6 +349,8 @@ class _TrackChildPageState extends State<TrackChildPage> {
                       ),
                     ],
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               )
             else

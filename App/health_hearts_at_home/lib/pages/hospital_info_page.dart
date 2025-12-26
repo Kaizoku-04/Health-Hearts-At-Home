@@ -6,8 +6,7 @@ import '../services/localization_service.dart';
 import '../services/url_launcher_service.dart';
 
 class HospitalInfoPage extends StatefulWidget {
-  final bool
-  isDark; // Keep for passing to next page, but don't rely on it for UI
+  final bool isDark; // Keep for passing to next page, but don't rely on it for UI
   final VoidCallback onToggleTheme;
 
   const HospitalInfoPage({
@@ -42,13 +41,11 @@ class _HospitalInfoPageState extends State<HospitalInfoPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // --- NEUTRAL PLATINUM PALETTE ---
-    final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF5F5F7);
+    final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFE7E7EC);
     final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
     final primaryText = isDark ? Colors.white : const Color(0xFF1D1D1F);
-    final secondaryText = isDark
-        ? const Color(0xFFBDBDBD)
-        : const Color(0xFF5A5A60);
-    const hospitalAccent = Color(0xFF264653);
+    final secondaryText = isDark ? const Color(0xFFBDBDBD) : const Color(0xFF5A5A60);
+    const hospitalAccent = Color(0xFF5d9bb5);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -165,9 +162,7 @@ class _HospitalInfoPageState extends State<HospitalInfoPage> {
               title: AppStrings.get('Heart Care Service Website', lang),
               content: 'lluch.org/heart-care',
               icon: Icons.monitor_heart_outlined,
-              onTap: () => URLLauncherService.openWebsite(
-                'https://lluch.org/heart-care',
-              ),
+              onTap: () => URLLauncherService.openWebsite('https://lluch.org/heart-care'),
               cardColor: cardColor,
               textColor: primaryText,
               subTextColor: secondaryText,
@@ -181,9 +176,7 @@ class _HospitalInfoPageState extends State<HospitalInfoPage> {
               title: AppStrings.get('Children\'s emergency room website', lang),
               content: 'Services / Emergency Room',
               icon: Icons.local_pharmacy_outlined,
-              onTap: () => URLLauncherService.openWebsite(
-                'https://lluch.org/services/childrens-emergency-room',
-              ),
+              onTap: () => URLLauncherService.openWebsite('https://lluch.org/services/childrens-emergency-room'),
               cardColor: cardColor,
               textColor: primaryText,
               subTextColor: secondaryText,
@@ -197,9 +190,7 @@ class _HospitalInfoPageState extends State<HospitalInfoPage> {
               title: "Billing & Insurance",
               content: 'Patients & Families / Billing',
               icon: Icons.receipt_long_rounded,
-              onTap: () => URLLauncherService.openWebsite(
-                'https://lluch.org/patients-families/patients/billing-insurance',
-              ),
+              onTap: () => URLLauncherService.openWebsite('https://lluch.org/patients-families/patients/billing-insurance'),
               cardColor: cardColor,
               textColor: primaryText,
               subTextColor: secondaryText,
@@ -214,7 +205,7 @@ class _HospitalInfoPageState extends State<HospitalInfoPage> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: hospitalAccent.withValues(alpha: 0.3),
+                    color: hospitalAccent.withOpacity(0.3),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),
@@ -271,13 +262,10 @@ class _HospitalInfoPageState extends State<HospitalInfoPage> {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey.withValues(alpha: isDark ? 0.1 : 0.08),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.grey.withOpacity(isDark ? 0.1 : 0.08), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.0 : 0.03),
+            color: Colors.black.withOpacity(isDark ? 0.0 : 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -291,7 +279,7 @@ class _HospitalInfoPageState extends State<HospitalInfoPage> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: accentColor.withValues(alpha: 0.1),
+                color: accentColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: accentColor, size: 24),
@@ -301,24 +289,9 @@ class _HospitalInfoPageState extends State<HospitalInfoPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: subTextColor,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
+                  Text(title, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: subTextColor, letterSpacing: 0.5)),
                   const SizedBox(height: 6),
-                  Text(
-                    content,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: textColor,
-                    ),
-                  ),
+                  Text(content, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textColor)),
                 ],
               ),
             ),
@@ -343,13 +316,10 @@ class _HospitalInfoPageState extends State<HospitalInfoPage> {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey.withValues(alpha: isDark ? 0.1 : 0.08),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.grey.withOpacity(isDark ? 0.1 : 0.08), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.0 : 0.03),
+            color: Colors.black.withOpacity(isDark ? 0.0 : 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -368,7 +338,7 @@ class _HospitalInfoPageState extends State<HospitalInfoPage> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: accentColor.withValues(alpha: 0.1),
+                    color: accentColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(icon, color: accentColor, size: 22),
@@ -378,25 +348,9 @@ class _HospitalInfoPageState extends State<HospitalInfoPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: subTextColor,
-                        ),
-                      ),
+                      Text(title, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: subTextColor)),
                       const SizedBox(height: 4),
-                      Text(
-                        content,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: textColor,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      Text(content, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textColor), maxLines: 1, overflow: TextOverflow.ellipsis),
                     ],
                   ),
                 ),

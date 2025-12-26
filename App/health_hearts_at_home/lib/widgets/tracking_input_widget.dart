@@ -22,8 +22,7 @@ class _TrackingInputWidgetState extends State<TrackingInputWidget> {
   String _feedingType = 'breast';
 
   final TextEditingController _weightController = TextEditingController();
-  final TextEditingController _feedingAmountController =
-      TextEditingController();
+  final TextEditingController _feedingAmountController = TextEditingController();
   final TextEditingController _oxygenController = TextEditingController();
   final TextEditingController _equipmentController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
@@ -38,13 +37,9 @@ class _TrackingInputWidgetState extends State<TrackingInputWidget> {
 
     // Colors
     final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-    final inputFillColor = isDark
-        ? const Color(0xFF2C2C2E)
-        : const Color(0xFFF5F5F7);
+    final inputFillColor = isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF5F5F7);
     final primaryText = isDark ? Colors.white : const Color(0xFF1D1D1F);
-    final secondaryText = isDark
-        ? const Color(0xFFBDBDBD)
-        : const Color(0xFF5A5A60);
+    final secondaryText = isDark ? const Color(0xFFBDBDBD) : const Color(0xFF5A5A60);
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -81,10 +76,7 @@ class _TrackingInputWidgetState extends State<TrackingInputWidget> {
               onTap: _pickDate,
               borderRadius: BorderRadius.circular(16),
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 decoration: BoxDecoration(
                   color: inputFillColor,
                   borderRadius: BorderRadius.circular(16),
@@ -92,11 +84,7 @@ class _TrackingInputWidgetState extends State<TrackingInputWidget> {
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.calendar_today_rounded,
-                      color: accentColor,
-                      size: 22,
-                    ),
+                    Icon(Icons.calendar_today_rounded, color: accentColor, size: 22),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -105,18 +93,18 @@ class _TrackingInputWidgetState extends State<TrackingInputWidget> {
                           Text(
                             AppStrings.get('date', widget.language),
                             style: TextStyle(
-                              fontSize: 12,
-                              color: secondaryText,
-                              fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                                color: secondaryText,
+                                fontWeight: FontWeight.w600
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             DateFormat('yyyy-MM-dd').format(_selectedDate),
                             style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: primaryText,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: primaryText
                             ),
                           ),
                         ],
@@ -175,72 +163,44 @@ class _TrackingInputWidgetState extends State<TrackingInputWidget> {
                     flex: 2,
                     child: DropdownButtonFormField<String>(
                       value: _feedingType,
-                      icon: Icon(
-                        Icons.arrow_drop_down_circle,
-                        color: secondaryText,
-                      ),
+                      icon: Icon(Icons.arrow_drop_down_circle, color: secondaryText),
                       dropdownColor: cardColor,
                       decoration: InputDecoration(
-                        labelText: AppStrings.get(
-                          'feedingType',
-                          widget.language,
-                        ),
+                        labelText: AppStrings.get('feedingType', widget.language),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 4,
-                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                         labelStyle: TextStyle(color: secondaryText),
                       ),
                       style: TextStyle(
                         color: primaryText,
                         fontWeight: FontWeight.bold,
-                        fontFamily: Theme.of(
-                          context,
-                        ).textTheme.bodyMedium?.fontFamily,
+                        fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
                       ),
                       items: [
                         DropdownMenuItem(
                           value: 'breast',
-                          child: Text(
-                            AppStrings.get('breast', widget.language),
-                          ),
+                          child: Text(AppStrings.get('breast', widget.language)),
                         ),
                         DropdownMenuItem(
                           value: 'bottle',
-                          child: Text(
-                            AppStrings.get('bottle', widget.language),
-                          ),
+                          child: Text(AppStrings.get('bottle', widget.language)),
                         ),
                       ],
-                      onChanged: (value) =>
-                          setState(() => _feedingType = value!),
+                      onChanged: (value) => setState(() => _feedingType = value!),
                     ),
                   ),
-                  Container(
-                    width: 1,
-                    height: 40,
-                    color: Colors.grey.withValues(alpha: 0.3),
-                  ),
+                  Container(width: 1, height: 40, color: Colors.grey.withOpacity(0.3)),
                   // Feeding Amount Input
                   Expanded(
                     flex: 2,
                     child: TextFormField(
                       controller: _feedingAmountController,
-                      style: TextStyle(
-                        color: primaryText,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(color: primaryText, fontWeight: FontWeight.bold),
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        labelText: AppStrings.get(
-                          'feedingAmount',
-                          widget.language,
-                        ),
+                        labelText: AppStrings.get('feedingAmount', widget.language),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                         labelStyle: TextStyle(color: secondaryText),
                         suffixText: "ml",
                       ),
@@ -283,7 +243,7 @@ class _TrackingInputWidgetState extends State<TrackingInputWidget> {
                   backgroundColor: accentColor,
                   foregroundColor: Colors.white,
                   elevation: 4,
-                  shadowColor: accentColor.withValues(alpha: 0.4),
+                  shadowColor: accentColor.withOpacity(0.4),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -351,6 +311,53 @@ class _TrackingInputWidgetState extends State<TrackingInputWidget> {
           horizontal: 16,
           vertical: 16,
         ),
+      ),
+    );
+  }
+
+  // --- HELPER: Custom Text Field ---
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required bool isDark,
+    required Color fillColor,
+    required Color textColor,
+    bool isNumber = false,
+    int maxLines = 1,
+    String? hintText,
+  }) {
+    return TextFormField(
+      controller: controller,
+      style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hintText,
+        alignLabelWithHint: maxLines > 1,
+        prefixIcon: maxLines > 1
+            ? Container(
+            margin: const EdgeInsets.only(bottom: 40),
+            child: Icon(icon, color: Colors.grey[500])
+        )
+            : Icon(icon, color: Colors.grey[500]),
+        filled: true,
+        fillColor: fillColor,
+        labelStyle: TextStyle(color: Colors.grey[600]),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none, // Clean look
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.transparent),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: accentColor, width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
     );
   }

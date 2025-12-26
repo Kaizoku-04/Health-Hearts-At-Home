@@ -99,7 +99,7 @@ class _HospitalMapsPageState extends State<HospitalMapsPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // --- NEUTRAL PLATINUM PALETTE ---
-    final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF5F5F7);
+    final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFE7E7EC);
     final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
     final primaryText = isDark ? Colors.white : const Color(0xFF1D1D1F);
     final secondaryText = isDark ? Colors.grey[400]! : const Color(0xFF5A5A60);
@@ -147,86 +147,77 @@ class _HospitalMapsPageState extends State<HospitalMapsPage> {
       body: isLoading
           ? Center(child: CircularProgressIndicator(color: accentColor))
           : hospitalLocation == null
-          ? Center(
-              child: Text(
-                AppStrings.get('errorLoading', lang),
-                style: TextStyle(color: secondaryText),
-              ),
-            )
+          ? Center(child: Text(AppStrings.get('errorLoading', lang), style: TextStyle(color: secondaryText)))
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // --- MAP CONTAINER ---
-                  Container(
-                    height: 450, // Fixed height for consistency
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(
-                            alpha: isDark ? 0.3 : 0.1,
-                          ),
-                          blurRadius: 15,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    // ClipRRect ensures the map corners respect the container radius
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: HospitalMapWidget(
-                        selectedLocation: selectedLocation!,
-                      ),
-                    ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // --- MAP CONTAINER ---
+            Container(
+              height: 450, // Fixed height for consistency
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
                   ),
-                  const SizedBox(height: 28),
-
-                  // --- SELECTION HEADER ---
-                  Text(
-                    'Select Destination',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      color: secondaryText,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // --- HOSPITAL BUTTON ---
-                  _buildLocationButton(
-                    location: hospitalLocation!,
-                    isSelected: selectedLocation == hospitalLocation,
-                    icon: Icons.local_hospital_rounded,
-                    accentColor: accentColor,
-                    cardColor: cardColor,
-                    primaryText: primaryText,
-                    secondaryText: secondaryText,
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: 12),
-
-                  // --- FACILITIES BUTTONS ---
-                  ...facilities.map((facility) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _buildLocationButton(
-                        location: facility,
-                        isSelected: selectedLocation == facility,
-                        icon: Icons.place_rounded, // Generic pin for others
-                        accentColor: accentColor,
-                        cardColor: cardColor,
-                        primaryText: primaryText,
-                        secondaryText: secondaryText,
-                        isDark: isDark,
-                      ),
-                    );
-                  }),
                 ],
               ),
+              // ClipRRect ensures the map corners respect the container radius
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: HospitalMapWidget(selectedLocation: selectedLocation!),
+              ),
             ),
+            const SizedBox(height: 28),
+
+            // --- SELECTION HEADER ---
+            Text(
+              'Select Destination',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: secondaryText,
+                letterSpacing: 1.0,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // --- HOSPITAL BUTTON ---
+            _buildLocationButton(
+              location: hospitalLocation!,
+              isSelected: selectedLocation == hospitalLocation,
+              icon: Icons.local_hospital_rounded,
+              accentColor: accentColor,
+              cardColor: cardColor,
+              primaryText: primaryText,
+              secondaryText: secondaryText,
+              isDark: isDark,
+            ),
+            const SizedBox(height: 12),
+
+            // --- FACILITIES BUTTONS ---
+            ...facilities.map((facility) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildLocationButton(
+                  location: facility,
+                  isSelected: selectedLocation == facility,
+                  icon: Icons.place_rounded, // Generic pin for others
+                  accentColor: accentColor,
+                  cardColor: cardColor,
+                  primaryText: primaryText,
+                  secondaryText: secondaryText,
+                  isDark: isDark,
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
     );
   }
 
@@ -245,9 +236,7 @@ class _HospitalMapsPageState extends State<HospitalMapsPage> {
     // If not selected, use Card Color background + Normal Text
     final backgroundColor = isSelected ? accentColor : cardColor;
     final titleColor = isSelected ? Colors.white : primaryText;
-    final subtitleColor = isSelected
-        ? Colors.white.withValues(alpha: 0.8)
-        : secondaryText;
+    final subtitleColor = isSelected ? Colors.white.withOpacity(0.8) : secondaryText;
     final iconColor = isSelected ? Colors.white : accentColor;
 
     return GestureDetector(
@@ -260,17 +249,12 @@ class _HospitalMapsPageState extends State<HospitalMapsPage> {
           borderRadius: BorderRadius.circular(16),
           border: isSelected
               ? null // No border if selected (color fill is enough)
-              : Border.all(
-                  color: Colors.grey.withValues(alpha: isDark ? 0.2 : 0.1),
-                  width: 1,
-                ),
+              : Border.all(color: Colors.grey.withOpacity(isDark ? 0.2 : 0.1), width: 1),
           boxShadow: [
             BoxShadow(
               color: isSelected
-                  ? accentColor.withValues(
-                      alpha: 0.4,
-                    ) // Colored shadow if selected
-                  : Colors.black.withValues(alpha: isDark ? 0.0 : 0.03),
+                  ? accentColor.withOpacity(0.4) // Colored shadow if selected
+                  : Colors.black.withOpacity(isDark ? 0.0 : 0.03),
               blurRadius: isSelected ? 12 : 8,
               offset: const Offset(0, 4),
             ),
@@ -282,9 +266,7 @@ class _HospitalMapsPageState extends State<HospitalMapsPage> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: isSelected
-                    ? Colors.white.withValues(alpha: 0.2)
-                    : accentColor.withValues(alpha: 0.1),
+                color: isSelected ? Colors.white.withOpacity(0.2) : accentColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: iconColor, size: 24),
