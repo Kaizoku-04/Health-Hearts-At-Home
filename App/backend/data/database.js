@@ -139,6 +139,67 @@ export async function init() {
       WHERE consumed_at IS NULL;
     `);
 
+    // ----------------------------
+    // Tutorials
+    // ----------------------------
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS tutorials (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        image_url TEXT,
+        video_url TEXT,
+        external_link TEXT,
+        language TEXT NOT NULL DEFAULT 'en',
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_tutorials_language
+      ON tutorials(language);
+    `);
+
+    await client.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_trigger WHERE tgname = 'tutorials_set_updated_at'
+        ) THEN
+          CREATE TRIGGER tutorials_set_updated_at
+          BEFORE UPDATE ON tutorials
+          FOR EACH ROW EXECUTE PROCEDURE set_updated_at();
+        END IF;
+      END$$;
+    `);
+
+
+    // ----------------------------
+    // Spiritual (audio only)
+    // ----------------------------
+    await client.query(`
+  CREATE TABLE IF NOT EXISTS spiritual (
+    id SERIAL PRIMARY KEY,
+    index INT NOT NULL UNIQUE,   -- 1..8
+    audio_url TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  );
+`);
+
+    await client.query(`
+  DO $$
+  BEGIN
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_trigger WHERE tgname = 'spiritual_set_updated_at'
+    ) THEN
+      CREATE TRIGGER spiritual_set_updated_at
+      BEFORE UPDATE ON spiritual
+      FOR EACH ROW EXECUTE PROCEDURE set_updated_at();
+    END IF;
+  END$$;
+`);
     await client.query('COMMIT');
     console.log('Postgres auth schema ensured');
   } catch (err) {

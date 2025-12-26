@@ -4,6 +4,7 @@ import '../services/app_service.dart';
 import '../services/localization_service.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/content_card.dart';
+import 'quran_page.dart'; // ✅ new page
 
 class SpiritualPage extends StatelessWidget {
   final bool isDark;
@@ -27,6 +28,7 @@ class SpiritualPage extends StatelessWidget {
             ? 'Inspirational devotionals for caregivers'
             : 'تأملات ملهمة لمقدمي الرعاية',
         'hasVideo': true,
+        'type': 'devotionals',
       },
       {
         'title': lang == 'en' ? 'Prayer Resources' : 'موارد الصلاة',
@@ -34,6 +36,7 @@ class SpiritualPage extends StatelessWidget {
             ? 'Collection of prayers for strength and healing'
             : 'مجموعة من الصلوات للقوة والشفاء',
         'hasVideo': false,
+        'type': 'prayer',
       },
       {
         'title': lang == 'en' ? 'Chapel Services' : 'خدمات الكنيسة',
@@ -41,6 +44,7 @@ class SpiritualPage extends StatelessWidget {
             ? 'Chapel services and spiritual counseling'
             : 'خدمات الكنيسة والاستشارة الروحية',
         'hasVideo': false,
+        'type': 'chapel',
       },
       {
         'title': lang == 'en'
@@ -50,6 +54,15 @@ class SpiritualPage extends StatelessWidget {
             ? 'Guided meditation for peace and calmness'
             : 'تأمل موجه للسلام والهدوء',
         'hasVideo': true,
+        'type': 'meditation',
+      },
+      {
+        'title': lang == 'en' ? 'Qur\'an Verses' : 'آيات من القرآن الكريم',
+        'description': lang == 'en'
+            ? 'Selected Qur\'an verses with audio and translation'
+            : 'آيات مختارة مع التلاوة والترجمة',
+        'hasVideo': false,
+        'type': 'quran', // ✅ special type
       },
     ];
 
@@ -63,11 +76,25 @@ class SpiritualPage extends StatelessWidget {
         itemCount: spiritualItems.length,
         itemBuilder: (context, index) {
           final item = spiritualItems[index];
+          final type = item['type'];
+
           return ContentCard(
             title: item['title']?.toString() ?? '',
             description: item['description']?.toString() ?? '',
             hasVideo: item['hasVideo'] as bool,
-            onTap: () {},
+            onTap: () {
+              if (type == 'quran') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        QuranPage(isDark: isDark, onToggleTheme: onToggleTheme),
+                  ),
+                );
+              } else {
+                // TODO: handle other spiritual items later if needed
+              }
+            },
           );
         },
       ),

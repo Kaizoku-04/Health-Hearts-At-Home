@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../widgets/app_bar_widget.dart';
 import '../widgets/video_player_widget.dart';
-import '../models/content_model.dart';
+import '../models/tutorials_item.dart';
 
 class VideoDetailPage extends StatelessWidget {
-  final ContentItem video;
+  final TutorialsItem video;
   final bool isDark;
   final VoidCallback onToggleTheme;
 
@@ -43,7 +43,7 @@ class VideoDetailPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    video.description,
+                    video.description!,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[600],

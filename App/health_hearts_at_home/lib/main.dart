@@ -9,7 +9,7 @@ import 'models/themes.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
-  const baseUrl = 'http://192.168.1.155:4000';
+  const baseUrl = 'http://10.32.99.85:4000';
   await dotenv.load(fileName: ".env");
   runApp(
     // MultiProvider(

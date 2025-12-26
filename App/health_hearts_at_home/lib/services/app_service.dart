@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import '../models/child_model.dart';
 import '../models/tracking_model.dart';
-import '../models/content_model.dart';
+import '../models/tutorials_item.dart';
 import 'api_service.dart';
+import '../models/spiritual_item.dart';
 
 class AppService extends ChangeNotifier {
   final ApiService api;
@@ -11,7 +12,10 @@ class AppService extends ChangeNotifier {
   String _currentLanguage = 'en';
   Child? _currentChild;
   List<ChildTracking> _trackingData = [];
-  List<ContentItem> _contentItems = [];
+  List<TutorialsItem> _tutorialsItems = [];
+  List<SpiritualItem> _spiritualItems = [];
+  List<SpiritualItem> get spiritualItems => _spiritualItems;
+
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -21,7 +25,7 @@ class AppService extends ChangeNotifier {
   String get currentLanguage => _currentLanguage;
   Child? get currentChild => _currentChild;
   List<ChildTracking> get trackingData => _trackingData;
-  List<ContentItem> get contentItems => _contentItems;
+  List<TutorialsItem> get tutorialsItems => _tutorialsItems;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -143,20 +147,35 @@ class AppService extends ChangeNotifier {
     }
   }
 
-  // ✅ Fetch content by category
-  Future<void> fetchContent(String category) async {
+  Future<void> fetchTutorials({int? limit, int? offset}) async {
     try {
       _isLoading = true;
       _errorMessage = null;
       notifyListeners();
 
-      final response = await api.get(
-        '/api/content',
-        queryParameters: {'category': category, 'language': _currentLanguage},
-      );
+      final query = <String, dynamic>{
+        'language': _currentLanguage,
+        if (limit != null) 'limit': limit.toString(),
+        if (offset != null) 'offset': offset.toString(),
+      };
 
-      _contentItems = (response as List)
-          .map((item) => ContentItem.fromJson(item as Map<String, dynamic>))
+      final response = await api.get('/api/tutorials', queryParameters: query);
+
+      // Backend may return either:
+      // 1) a plain List (older behaviour) OR
+      // 2) an object { count, limit, offset, data }
+      List rawList;
+      if (response is Map && response.containsKey('data')) {
+        rawList = response['data'] as List;
+      } else if (response is List) {
+        rawList = response;
+      } else {
+        // Unexpected format: fallback to empty
+        rawList = [];
+      }
+
+      _tutorialsItems = rawList
+          .map((item) => TutorialsItem.fromJson(item as Map<String, dynamic>))
           .toList();
 
       _isLoading = false;
@@ -165,17 +184,36 @@ class AppService extends ChangeNotifier {
       _isLoading = false;
       _errorMessage = _getDioErrorMessage(e);
       notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      notifyListeners();
     }
-  }
-
-  // ✅ Fetch tutorials
-  Future<void> fetchTutorials() async {
-    await fetchContent('tutorials');
   }
 
   // ✅ Fetch spiritual content
   Future<void> fetchSpiritualContent() async {
-    await fetchContent('spiritual');
+    try {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      final response = await api.get('/api/spiritual');
+      if (response is List) {
+        _spiritualItems = response
+            .map((item) => SpiritualItem.fromJson(item as Map<String, dynamic>))
+            .toList();
+      } else {
+        _spiritualItems = [];
+      }
+
+      _isLoading = false;
+      notifyListeners();
+    } on DioException catch (e) {
+      _isLoading = false;
+      _errorMessage = _getDioErrorMessage(e);
+      notifyListeners();
+    }
   }
 
   // ✅ Fetch hospital info
@@ -248,5 +286,11 @@ class AppService extends ChangeNotifier {
   // ✅ Remove auth token (call this on logout)
   void removeAuthToken() {
     api.removeAuthToken();
+  }
+
+  void setLanguage(String languageCode) {
+    _currentLanguage =
+        languageCode; // Or however you store your language variable
+    notifyListeners(); // Important to update the UI
   }
 }

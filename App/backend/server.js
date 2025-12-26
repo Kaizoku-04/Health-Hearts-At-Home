@@ -1,40 +1,98 @@
 // server.js
-import 'dotenv/config';           // loads .env into process.env (optional but recommended)
+import 'dotenv/config';
+import path from 'path';
 import express from 'express';
 import cors from 'cors';
-import helmet from 'helmet';      // small security improvement (optional)
-import routes from './src/routes.js'; // <-- main aggregator from the refactor
+import helmet from 'helmet';
+import { fileURLToPath } from 'url';
+
+import routes from './src/routes.js';
+import tutorialsrouter from './src/routes/tutorials.js';
+import spiritualrouter from './src/routes/spiritual.js';
 import db from './data/database.js';
+import trackingRouter from './src/routes/tracking.js';
+import childrenRouter from './src/routes/children.js';
+
+
+// emulate __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Basic middleware
+/* ================================
+   BASIC MIDDLEWARE
+   ================================ */
 app.use(helmet());
-app.use(cors());      // DEV: allow all origins. In prod restrict origins.
+app.use(cors());              // DEV: allow all origins
 app.use(express.json());
 
-// Mount the refactored routes. I kept the same paths so existing clients don't need changes.
-app.use('/', routes);
+/* ================================
+   MEDIA RANGE SUPPORT (IMPORTANT)
+   ================================ */
+app.use((req, res, next) => {
+    if (req.method === 'GET') {
+        res.setHeader('Accept-Ranges', 'bytes');
+    }
+    next();
+});
 
-// generic error handler (put before app.listen)
+/* ================================
+   SERVE MEDIA FOLDER
+   ================================ */
+
+// App/
+// ├─ backend/
+// └─ media/
+app.use(
+    '/media',
+    express.static(path.join(__dirname, '..', 'media'), {
+        setHeaders: (res, filePath) => {
+            // enforce correct streaming behavior for audio/video
+            if (/\.(mp3|mp4|m4a|wav|ogg)$/i.test(filePath)) {
+                res.setHeader('Accept-Ranges', 'bytes');
+            }
+        },
+    })
+);
+
+/* ================================
+   ROUTES
+   ================================ */
+app.use('/', routes);
+app.use('/api/tutorials', tutorialsrouter);
+app.use('/api/spiritual', spiritualrouter);
+app.use('/api/children', childrenRouter);
+app.use('/api/tracking', trackingRouter);
+
+/* ================================
+   ERROR HANDLER
+   ================================ */
 app.use((err, req, res, next) => {
     console.error('Unhandled error:', err);
-    // don't leak internals in production
-    const msg = process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message || 'Internal server error';
+    const msg =
+        process.env.NODE_ENV === 'production'
+            ? 'Internal server error'
+            : err.message || 'Internal server error';
+
     res.status(err.status || 500).json({ message: msg });
 });
 
-// Prefer binding to 0.0.0.0 for access from other machines on the LAN
+/* ================================
+   SERVER BOOT
+   ================================ */
 const PORT = process.env.PORT || 4000;
 const HOST = process.env.HOST || '0.0.0.0';
 
 async function start() {
     try {
-        // ensure schema (dev convenience). In prod you might set DB_INIT=false and run migrations instead.
         await db.init();
 
         app.listen(PORT, HOST, () => {
-            console.log(`Auth server running on http://${HOST}:${PORT}`);
+            console.log(`Server running on http://${HOST}:${PORT}`);
+            console.log(`Media root available at http://${HOST}:${PORT}/media`);
+            console.log(`Tutorial images: /media/tutorials/{ar|en}/images`);
+            console.log(`Tutorial videos: /media/tutorials/{ar|en}/videos`);
         });
     } catch (err) {
         console.error('Failed to start server due to DB error:', err);

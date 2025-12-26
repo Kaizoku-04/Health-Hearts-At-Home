@@ -14,7 +14,7 @@ class HospitalMapWidget extends StatefulWidget {
 }
 
 class _HospitalMapWidgetState extends State<HospitalMapWidget> {
-  late GoogleMapController mapController;
+  GoogleMapController? mapController;
   final Set<Marker> _markers = {};
   final Set<Polyline> _polylines = {};
   final secrets = dotenv.load(fileName: ".env");
@@ -29,7 +29,7 @@ class _HospitalMapWidgetState extends State<HospitalMapWidget> {
   void didUpdateWidget(HospitalMapWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.selectedLocation != widget.selectedLocation) {
-      mapController.animateCamera(
+      mapController?.animateCamera(
         CameraUpdate.newLatLngZoom(
           LatLng(
             widget.selectedLocation.latitude,
@@ -142,7 +142,7 @@ class _HospitalMapWidgetState extends State<HospitalMapWidget> {
 
   @override
   void dispose() {
-    mapController.dispose();
+    mapController?.dispose();
     super.dispose();
   }
 }
