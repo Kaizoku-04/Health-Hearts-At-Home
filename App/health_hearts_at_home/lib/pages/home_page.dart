@@ -31,7 +31,7 @@ class HomePage extends StatelessWidget {
     // Background:
     // Light Mode: 'Morning Sky' (EBF2FA) - A fresh, lively blue-white tint.
     // Dark Mode: Deep Black/Grey.
-    final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF5F5F7);
+    final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFFFE7E7EC);
 
     // Text:
     final primaryText = isDark ? Colors.white : const Color(0xFF1D1D1F);
@@ -48,7 +48,7 @@ class HomePage extends StatelessWidget {
     final colorChildcare = const Color(0xFFE76F51);
     final colorTutorials = const Color(0xFF2A9D8F);
     final colorHospital  = const Color(0xFF264653);
-    final colorSupport   = const Color(0xFFE9C46A);
+    final colorSupport   = const Color(0xFFe3b23e);
     final colorSpiritual = const Color(0xFF8E44AD);
     final colorInfo      = const Color(0xFF457B9D);
 
@@ -166,7 +166,7 @@ class HomePage extends StatelessWidget {
                   label: AppStrings.get('caregiverSupport', lang),
                   subtitle: "Get help",
                   icon: Icons.favorite_border_rounded,
-                  accentColor: colorSupport,
+                  accentColor: colorSupport, // come here
                   isDark: isDark,
                   textColor: primaryText,
                   onTap: () => _navigateTo(context, CaregiverSupportPage(isDark: isDark, onToggleTheme: onToggleTheme)),
@@ -327,7 +327,7 @@ class HomePage extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.1),
+                    color: accentColor.withOpacity(0.2), //come here
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: accentColor, size: 22),
