@@ -47,7 +47,7 @@ class HomePage extends StatelessWidget {
     // Accent Colors
     final colorChildcare = const Color(0xFFE76F51);
     final colorTutorials = const Color(0xFF2A9D8F);
-    final colorHospital  = const Color(0xFF264653);
+    final colorHospital  = const Color(0xFF5d9bb5);
     final colorSupport   = const Color(0xFFe3b23e);
     final colorSpiritual = const Color(0xFF8E44AD);
     final colorInfo      = const Color(0xFF457B9D);
