@@ -41,11 +41,11 @@ class _HospitalInfoPageState extends State<HospitalInfoPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // --- NEUTRAL PLATINUM PALETTE ---
-    final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF5F5F7);
+    final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFE7E7EC);
     final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
     final primaryText = isDark ? Colors.white : const Color(0xFF1D1D1F);
     final secondaryText = isDark ? const Color(0xFFBDBDBD) : const Color(0xFF5A5A60);
-    const hospitalAccent = Color(0xFF264653);
+    const hospitalAccent = Color(0xFF5d9bb5);
 
     return Scaffold(
       backgroundColor: bgColor,
