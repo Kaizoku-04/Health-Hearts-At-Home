@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart' hide MenuController;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+
+import 'models/themes.dart';
+// ✅ Uncommented this so AuthGate can use it
+import 'pages/auth_page.dart';
+import 'pages/home_page.dart';
 import 'services/api_service.dart';
 import 'services/auth_service.dart';
 import 'services/app_service.dart';

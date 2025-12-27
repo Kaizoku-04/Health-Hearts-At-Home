@@ -135,10 +135,7 @@ class _AuthPageState extends State<AuthPage> {
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(c, null),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(c, null), child: const Text('Cancel')),
           TextButton(
             onPressed: () {
               final e = emailDlgController.text.trim();
@@ -191,24 +188,17 @@ class _AuthPageState extends State<AuthPage> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'We sent a verification code to your email. Enter it below.',
-              ),
+              const Text('We sent a verification code to your email. Enter it below.'),
               const SizedBox(height: 12),
               TextField(
                 controller: codeController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  hintText: 'Verification code',
-                ),
+                decoration: const InputDecoration(hintText: 'Verification code'),
               ),
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(c, null),
-              child: const Text('Cancel'),
-            ),
+            TextButton(onPressed: () => Navigator.pop(c, null), child: const Text('Cancel')),
             ValueListenableBuilder<bool>(
               valueListenable: codeVerifying,
               builder: (ctx, verifying, _) {
@@ -240,11 +230,7 @@ class _AuthPageState extends State<AuthPage> {
                             Navigator.of(c).pop(code);
                         },
                   child: verifying
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Verify'),
                 );
               },
@@ -286,26 +272,19 @@ class _AuthPageState extends State<AuthPage> {
                 TextField(
                   controller: newPassController,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    hintText: 'New password (min 6 chars)',
-                  ),
+                  decoration: const InputDecoration(hintText: 'New password (min 6 chars)'),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: confirmPassController,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    hintText: 'Confirm password',
-                  ),
+                  decoration: const InputDecoration(hintText: 'Confirm password'),
                 ),
               ],
             ),
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(c, false),
-              child: const Text('Cancel'),
-            ),
+            TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
             ValueListenableBuilder<bool>(
               valueListenable: submittingNotifier,
               builder: (ctx, submitting, _) {
@@ -631,3 +610,4 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 }
+// testing
