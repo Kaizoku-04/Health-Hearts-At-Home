@@ -112,7 +112,9 @@ class _AuthPageState extends State<AuthPage> {
 
   Future<void> _forgotPassword() async {
     final auth = context.read<AuthService>();
-    final emailDlgController = TextEditingController(text: _emailController.text.trim());
+    final emailDlgController = TextEditingController(
+      text: _emailController.text.trim(),
+    );
 
     // 1. Ask for Email
     final String? email = await showDialog<String?>(
@@ -162,7 +164,10 @@ class _AuthPageState extends State<AuthPage> {
     }
 
     if (sendErr != null) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(sendErr)));
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(sendErr)));
       return;
     }
 
@@ -176,7 +181,9 @@ class _AuthPageState extends State<AuthPage> {
       barrierDismissible: false,
       builder: (c) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: const Text('Enter verification code'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -196,24 +203,32 @@ class _AuthPageState extends State<AuthPage> {
               valueListenable: codeVerifying,
               builder: (ctx, verifying, _) {
                 return TextButton(
-                  onPressed: verifying ? null : () async {
-                    final code = codeController.text.trim();
-                    if (code.isEmpty) return;
-                    codeVerifying.value = true;
-                    String? verifyErr;
-                    try {
-                      verifyErr = await auth.verifyResetCode(email: email, code: code);
-                    } catch (e) {
-                      verifyErr = e.toString();
-                    }
-                    if (!mounted) return;
-                    codeVerifying.value = false;
-                    if (verifyErr != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(verifyErr)));
-                      return;
-                    }
-                    if (Navigator.of(c).canPop()) Navigator.of(c).pop(code);
-                  },
+                  onPressed: verifying
+                      ? null
+                      : () async {
+                          final code = codeController.text.trim();
+                          if (code.isEmpty) return;
+                          codeVerifying.value = true;
+                          String? verifyErr;
+                          try {
+                            verifyErr = await auth.verifyResetCode(
+                              email: email,
+                              code: code,
+                            );
+                          } catch (e) {
+                            verifyErr = e.toString();
+                          }
+                          if (!mounted) return;
+                          codeVerifying.value = false;
+                          if (verifyErr != null) {
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(SnackBar(content: Text(verifyErr)));
+                            return;
+                          }
+                          if (Navigator.of(c).canPop())
+                            Navigator.of(c).pop(code);
+                        },
                   child: verifying
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Verify'),
@@ -244,7 +259,9 @@ class _AuthPageState extends State<AuthPage> {
       barrierDismissible: false,
       builder: (c) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: const Text('Choose new password'),
           content: SingleChildScrollView(
             child: Column(
@@ -272,31 +289,47 @@ class _AuthPageState extends State<AuthPage> {
               valueListenable: submittingNotifier,
               builder: (ctx, submitting, _) {
                 return TextButton(
-                  onPressed: submitting ? null : () async {
-                    final newPass = newPassController.text;
-                    if (_validatePassword(newPass) != null || newPass != confirmPassController.text) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid password or mismatch')));
-                      return;
-                    }
-                    submittingNotifier.value = true;
-                    String? confirmErr;
-                    try {
-                      confirmErr = await auth.confirmPasswordReset(
-                          email: email, code: verifiedCode, newPassword: newPass
-                      );
-                    } catch (e) {
-                      confirmErr = e.toString();
-                    }
-                    if (!mounted) return;
-                    submittingNotifier.value = false;
-                    if (confirmErr != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(confirmErr)));
-                      return;
-                    }
-                    if (Navigator.of(c).canPop()) Navigator.of(c).pop(true);
-                  },
+                  onPressed: submitting
+                      ? null
+                      : () async {
+                          final newPass = newPassController.text;
+                          if (_validatePassword(newPass) != null ||
+                              newPass != confirmPassController.text) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Invalid password or mismatch'),
+                              ),
+                            );
+                            return;
+                          }
+                          submittingNotifier.value = true;
+                          String? confirmErr;
+                          try {
+                            confirmErr = await auth.confirmPasswordReset(
+                              email: email,
+                              code: verifiedCode,
+                              newPassword: newPass,
+                            );
+                          } catch (e) {
+                            confirmErr = e.toString();
+                          }
+                          if (!mounted) return;
+                          submittingNotifier.value = false;
+                          if (confirmErr != null) {
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(SnackBar(content: Text(confirmErr)));
+                            return;
+                          }
+                          if (Navigator.of(c).canPop())
+                            Navigator.of(c).pop(true);
+                        },
                   child: submitting
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : const Text('Reset'),
                 );
               },
@@ -333,9 +366,16 @@ class _AuthPageState extends State<AuthPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       icon: gLoading
-          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
           : _googleLogoWidget(),
-      label: const Text('Continue with Google', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+      label: const Text(
+        'Continue with Google',
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+      ),
       onPressed: gLoading ? null : _onGoogleSignIn,
     );
   }
@@ -352,10 +392,14 @@ class _AuthPageState extends State<AuthPage> {
   @override
   Widget build(BuildContext context) {
     final isDarkTheme = widget.isDark;
-    final bgColor = isDarkTheme ? const Color(0xFF121212) : const Color(0xFFE7E7EC);
+    final bgColor = isDarkTheme
+        ? const Color(0xFF121212)
+        : const Color(0xFFE7E7EC);
     final cardColor = isDarkTheme ? const Color(0xFF1E1E1E) : Colors.white;
     final primaryText = isDarkTheme ? Colors.white : const Color(0xFF1D1D1F);
-    final secondaryText = isDarkTheme ? const Color(0xFFBDBDBD) : const Color(0xFF5A5A60);
+    final secondaryText = isDarkTheme
+        ? const Color(0xFFBDBDBD)
+        : const Color(0xFF5A5A60);
     final brandColor = customTheme;
 
     return Scaffold(
@@ -388,14 +432,16 @@ class _AuthPageState extends State<AuthPage> {
                   Text(
                     "Health Hearts at Home",
                     style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: primaryText
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: primaryText,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    _isLogin ? "Welcome back, please log in." : "Create an account to get started.",
+                    _isLogin
+                        ? "Welcome back, please log in."
+                        : "Create an account to get started.",
                     style: TextStyle(fontSize: 15, color: secondaryText),
                   ),
                   const SizedBox(height: 32),
@@ -406,10 +452,14 @@ class _AuthPageState extends State<AuthPage> {
                     decoration: BoxDecoration(
                       color: cardColor,
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.grey.withOpacity(isDarkTheme ? 0.2 : 0.1)),
+                      border: Border.all(
+                        color: Colors.grey.withOpacity(isDarkTheme ? 0.2 : 0.1),
+                      ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(isDarkTheme ? 0.0 : 0.05),
+                          color: Colors.black.withOpacity(
+                            isDarkTheme ? 0.0 : 0.05,
+                          ),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -423,9 +473,9 @@ class _AuthPageState extends State<AuthPage> {
                           Text(
                             _isLogin ? 'Log In' : 'Sign Up',
                             style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: primaryText
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: primaryText,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -433,18 +483,22 @@ class _AuthPageState extends State<AuthPage> {
 
                           AnimatedSwitcher(
                             duration: const Duration(milliseconds: 300),
-                            transitionBuilder: (child, animation) => SizeTransition(sizeFactor: animation, child: child),
+                            transitionBuilder: (child, animation) =>
+                                SizeTransition(
+                                  sizeFactor: animation,
+                                  child: child,
+                                ),
                             child: _isLogin
                                 ? const SizedBox.shrink()
                                 : Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
-                              child: CustomTextField(
-                                labelText: 'Full Name',
-                                prefixIcon: Icons.person_outline_rounded,
-                                controller: _nameController,
-                                isDark: isDarkTheme,
-                              ),
-                            ),
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: CustomTextField(
+                                      labelText: 'Full Name',
+                                      prefixIcon: Icons.person_outline_rounded,
+                                      controller: _nameController,
+                                      isDark: isDarkTheme,
+                                    ),
+                                  ),
                           ),
 
                           CustomTextField(
@@ -471,7 +525,10 @@ class _AuthPageState extends State<AuthPage> {
                                 onPressed: _loading ? null : _forgotPassword,
                                 child: Text(
                                   'Forgot password?',
-                                  style: TextStyle(color: brandColor, fontWeight: FontWeight.w600),
+                                  style: TextStyle(
+                                    color: brandColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             )
@@ -492,14 +549,20 @@ class _AuthPageState extends State<AuthPage> {
                             ),
                             child: _loading
                                 ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                            )
+                                    height: 24,
+                                    width: 24,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
                                 : Text(
-                              _isLogin ? 'Log In' : 'Sign Up',
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
+                                    _isLogin ? 'Log In' : 'Sign Up',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                           ),
                         ],
                       ),
@@ -516,11 +579,15 @@ class _AuthPageState extends State<AuthPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        _isLogin ? "Don't have an account? " : "Already have an account? ",
+                        _isLogin
+                            ? "Don't have an account? "
+                            : "Already have an account? ",
                         style: TextStyle(color: secondaryText),
                       ),
                       GestureDetector(
-                        onTap: _loading ? null : () => setState(() => _isLogin = !_isLogin),
+                        onTap: _loading
+                            ? null
+                            : () => setState(() => _isLogin = !_isLogin),
                         child: Text(
                           _isLogin ? "Sign Up" : "Log In",
                           style: TextStyle(
