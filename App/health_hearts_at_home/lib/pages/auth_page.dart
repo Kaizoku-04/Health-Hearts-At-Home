@@ -2,7 +2,7 @@ import 'package:health_hearts_at_home/models/themes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
-import 'package:health_hearts_at_home/widgets/text_field_widget.dart'; // import your widget
+import 'package:health_hearts_at_home/widgets/text_field_widget.dart';
 
 class AuthPage extends StatefulWidget {
   final VoidCallback onToggleTheme;
@@ -19,7 +19,7 @@ class AuthPage extends StatefulWidget {
 
 class _AuthPageState extends State<AuthPage> {
   final _formKey = GlobalKey<FormState>();
-  bool _isLogin = false;
+  bool _isLogin = true;
   bool _loading = false;
 
   final TextEditingController _nameController = TextEditingController();
@@ -51,7 +51,8 @@ class _AuthPageState extends State<AuthPage> {
     if (val.length < 6) return 'Password must be at least 6 characters';
     return null;
   }
-  // inside your AuthPage State class
+
+  // --- LOGIC METHODS ---
 
   void _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -79,17 +80,15 @@ class _AuthPageState extends State<AuthPage> {
     }
 
     if (err != null) {
-      // show a dialog/card with the message instead of the snack
       await _showMessageDialog(err);
     }
   }
 
-  // Add this helper to the same State class
   Future<void> _showMessageDialog(String message) {
     return showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Notice'),
         content: Text(message),
         actions: [
@@ -102,10 +101,8 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
-  // ---------- Google button handler ----------
   Future<void> _onGoogleSignIn() async {
     final auth = context.read<AuthService>();
-    // AuthService exposes loading internally (for google flow)
     final String? err = await auth.signInWithGoogle();
     if (!mounted) return;
     if (err != null) {
@@ -113,56 +110,15 @@ class _AuthPageState extends State<AuthPage> {
     }
   }
 
-  Widget _buildGoogleButton(BuildContext context) {
-    final auth = context.watch<AuthService>();
-    final bool gLoading = auth.loading;
-
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Theme.of(context).dividerColor),
-        ),
-      ),
-      icon: gLoading
-          ? SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : _googleLogoWidget(),
-      label: const Text('Continue with Google'),
-      onPressed: gLoading ? null : _onGoogleSignIn,
-    );
-  }
-
-  Widget _googleLogoWidget() {
-    // Prefer an asset logo if you have it. If not, show a simple Icon fallback.
-    // To use the asset, add an image at `assets/google_logo.png` and register it in pubspec.yaml.
-    // If you don't want an asset, the Icon below is a fine fallback.
-    return Image.asset(
-      'assets/google_logo.png',
-      height: 20,
-      width: 20,
-      errorBuilder: (context, error, stackTrace) {
-        return const Icon(Icons.login);
-      },
-    );
-  }
-
   Future<void> _forgotPassword() async {
     final auth = context.read<AuthService>();
+    final emailDlgController = TextEditingController(text: _emailController.text.trim());
 
-    // 1) Ask for email (prefill with existing input if available)
-    final emailDlgController = TextEditingController(
-      text: _emailController.text.trim(),
-    );
+    // 1. Ask for Email
     final String? email = await showDialog<String?>(
       context: context,
       builder: (c) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Reset password'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -177,18 +133,11 @@ class _AuthPageState extends State<AuthPage> {
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(c, null),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(c, null), child: const Text('Cancel')),
           TextButton(
             onPressed: () {
               final e = emailDlgController.text.trim();
-              if (e.isEmpty) {
-                _showSnack('Please enter an email');
-                return;
-              }
-              if (_validateEmail(e) != null) {
+              if (e.isEmpty || _validateEmail(e) != null) {
                 _showSnack('Enter a valid email');
                 return;
               }
@@ -213,99 +162,60 @@ class _AuthPageState extends State<AuthPage> {
     }
 
     if (sendErr != null) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(sendErr)));
-      }
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(sendErr)));
       return;
-    } // ---------- Step A: ask for code only ----------
+    }
+
+    // 2. Ask for Code
     if (!mounted) return;
     final codeController = TextEditingController();
     final codeVerifying = ValueNotifier<bool>(false);
-    String? verifiedCode;
 
-    verifiedCode = await showDialog<String?>(
+    String? verifiedCode = await showDialog<String?>(
       context: context,
       barrierDismissible: false,
       builder: (c) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Text('Enter verification code'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'We sent a verification code to your email. Enter it below.',
-              ),
+              const Text('We sent a verification code to your email. Enter it below.'),
               const SizedBox(height: 12),
               TextField(
                 controller: codeController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  hintText: 'Verification code',
-                ),
+                decoration: const InputDecoration(hintText: 'Verification code'),
               ),
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(c, null),
-              child: const Text('Cancel'),
-            ),
+            TextButton(onPressed: () => Navigator.pop(c, null), child: const Text('Cancel')),
             ValueListenableBuilder<bool>(
               valueListenable: codeVerifying,
               builder: (ctx, verifying, _) {
                 return TextButton(
-                  onPressed: verifying
-                      ? null
-                      : () async {
-                          // ✅ Disable button while loading
-                          final code = codeController.text.trim();
-                          if (code.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Enter verification code'),
-                              ),
-                            );
-                            return;
-                          }
-
-                          codeVerifying.value = true;
-
-                          String? verifyErr;
-                          try {
-                            verifyErr = await auth.verifyResetCode(
-                              email: email,
-                              code: code,
-                            );
-                          } catch (e) {
-                            verifyErr = e.toString();
-                          }
-
-                          if (!mounted) {
-                            codeVerifying.value = false;
-                            return;
-                          }
-
-                          if (verifyErr != null) {
-                            codeVerifying.value = false;
-                            ScaffoldMessenger.of(
-                              context,
-                            ).showSnackBar(SnackBar(content: Text(verifyErr)));
-                            return;
-                          }
-
-                          // ✅ Pop BEFORE resetting the notifier to avoid rebuild issues
-                          if (Navigator.of(c).canPop()) {
-                            Navigator.of(c).pop(code);
-                          }
-                        },
+                  onPressed: verifying ? null : () async {
+                    final code = codeController.text.trim();
+                    if (code.isEmpty) return;
+                    codeVerifying.value = true;
+                    String? verifyErr;
+                    try {
+                      verifyErr = await auth.verifyResetCode(email: email, code: code);
+                    } catch (e) {
+                      verifyErr = e.toString();
+                    }
+                    if (!mounted) return;
+                    codeVerifying.value = false;
+                    if (verifyErr != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(verifyErr)));
+                      return;
+                    }
+                    if (Navigator.of(c).canPop()) Navigator.of(c).pop(code);
+                  },
                   child: verifying
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Verify'),
                 );
               },
@@ -315,7 +225,6 @@ class _AuthPageState extends State<AuthPage> {
       },
     );
 
-    // ✅ Dispose after frame completes to ensure dialog is fully unmounted
     WidgetsBinding.instance.addPostFrameCallback((_) {
       emailDlgController.dispose();
       codeController.dispose();
@@ -323,7 +232,8 @@ class _AuthPageState extends State<AuthPage> {
     });
 
     if (verifiedCode == null) return;
-    // ---------- Step B: ask for new password only ----------
+
+    // 3. New Password
     final newPassController = TextEditingController();
     final confirmPassController = TextEditingController();
     final submittingNotifier = ValueNotifier<bool>(false);
@@ -334,6 +244,7 @@ class _AuthPageState extends State<AuthPage> {
       barrierDismissible: false,
       builder: (c) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Text('Choose new password'),
           content: SingleChildScrollView(
             child: Column(
@@ -344,90 +255,49 @@ class _AuthPageState extends State<AuthPage> {
                 TextField(
                   controller: newPassController,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    hintText: 'New password (min 6 chars)',
-                  ),
+                  decoration: const InputDecoration(hintText: 'New password (min 6 chars)'),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: confirmPassController,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    hintText: 'Confirm password',
-                  ),
+                  decoration: const InputDecoration(hintText: 'Confirm password'),
                 ),
               ],
             ),
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(c, false),
-              child: const Text('Cancel'),
-            ),
+            TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
             ValueListenableBuilder<bool>(
               valueListenable: submittingNotifier,
               builder: (ctx, submitting, _) {
                 return TextButton(
-                  onPressed: submitting
-                      ? null
-                      : () async {
-                          // ✅ Disable button while loading
-                          final newPass = newPassController.text;
-                          final confirm = confirmPassController.text;
-                          final passErr = _validatePassword(newPass);
-                          if (passErr != null) {
-                            ScaffoldMessenger.of(
-                              context,
-                            ).showSnackBar(SnackBar(content: Text(passErr)));
-                            return;
-                          }
-                          if (newPass != confirm) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Passwords do not match'),
-                              ),
-                            );
-                            return;
-                          }
-
-                          submittingNotifier.value = true;
-
-                          String? confirmErr;
-                          try {
-                            confirmErr = await auth.confirmPasswordReset(
-                              email: email,
-                              code: verifiedCode!,
-                              newPassword: newPass,
-                            );
-                          } catch (e) {
-                            confirmErr = e.toString();
-                          }
-
-                          if (!mounted) {
-                            submittingNotifier.value = false;
-                            return;
-                          }
-
-                          if (confirmErr != null) {
-                            submittingNotifier.value = false;
-                            ScaffoldMessenger.of(
-                              context,
-                            ).showSnackBar(SnackBar(content: Text(confirmErr)));
-                            return;
-                          }
-
-                          // ✅ Pop BEFORE resetting the notifier
-                          if (Navigator.of(c).canPop()) {
-                            Navigator.of(c).pop(true);
-                          }
-                        },
+                  onPressed: submitting ? null : () async {
+                    final newPass = newPassController.text;
+                    if (_validatePassword(newPass) != null || newPass != confirmPassController.text) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid password or mismatch')));
+                      return;
+                    }
+                    submittingNotifier.value = true;
+                    String? confirmErr;
+                    try {
+                      confirmErr = await auth.confirmPasswordReset(
+                          email: email, code: verifiedCode, newPassword: newPass
+                      );
+                    } catch (e) {
+                      confirmErr = e.toString();
+                    }
+                    if (!mounted) return;
+                    submittingNotifier.value = false;
+                    if (confirmErr != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(confirmErr)));
+                      return;
+                    }
+                    if (Navigator.of(c).canPop()) Navigator.of(c).pop(true);
+                  },
                   child: submitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Reset password'),
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Text('Reset'),
                 );
               },
             ),
@@ -436,7 +306,6 @@ class _AuthPageState extends State<AuthPage> {
       },
     );
 
-    // ✅ Dispose after frame completes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       newPassController.dispose();
       confirmPassController.dispose();
@@ -446,155 +315,226 @@ class _AuthPageState extends State<AuthPage> {
     if (completed == true) {
       _emailController.text = email;
       _passwordController.clear();
-      if (mounted) {
-        _showSnack('Password reset successful — you can now log in');
-      }
+      if (mounted) _showSnack('Password reset successful — you can now log in');
     }
+  }
+
+  // --- UI BUILDING BLOCKS ---
+
+  Widget _buildGoogleButton(BuildContext context, bool isDark) {
+    final auth = context.watch<AuthService>();
+    final bool gLoading = auth.loading;
+
+    return OutlinedButton.icon(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: isDark ? Colors.white : Colors.black87,
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        side: BorderSide(color: isDark ? Colors.grey[700]! : Colors.grey[300]!),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      icon: gLoading
+          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+          : _googleLogoWidget(),
+      label: const Text('Continue with Google', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+      onPressed: gLoading ? null : _onGoogleSignIn,
+    );
+  }
+
+  Widget _googleLogoWidget() {
+    return Image.asset(
+      'assets/google_logo.png',
+      height: 24,
+      width: 24,
+      errorBuilder: (context, error, stackTrace) => const Icon(Icons.login),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isDarkTheme = widget.isDark;
+    final bgColor = isDarkTheme ? const Color(0xFF121212) : const Color(0xFFE7E7EC);
+    final cardColor = isDarkTheme ? const Color(0xFF1E1E1E) : Colors.white;
+    final primaryText = isDarkTheme ? Colors.white : const Color(0xFF1D1D1F);
+    final secondaryText = isDarkTheme ? const Color(0xFFBDBDBD) : const Color(0xFF5A5A60);
+    final brandColor = customTheme;
 
     return Scaffold(
+      backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: Text('Sign Up / Log In', style: TextStyle(color: customTheme)),
-        centerTitle: true,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           IconButton(
             onPressed: widget.onToggleTheme,
-            icon: Icon(widget.isDark ? (Icons.dark_mode) : Icons.light_mode),
-            color: customTheme,
-            padding: EdgeInsets.only(right: 20.0),
+            icon: Icon(isDarkTheme ? Icons.light_mode : Icons.dark_mode),
+            color: primaryText,
+            padding: const EdgeInsets.only(right: 20.0),
           ),
         ],
       ),
       body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 500),
+        // ✅ WRAP WITH ScrollConfiguration TO HIDE SCROLLBAR
+        child: ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-            child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 6,
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 450),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.favorite_rounded, size: 64, color: brandColor),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Health Hearts at Home",
+                    style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: primaryText
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _isLogin ? "Welcome back, please log in." : "Create an account to get started.",
+                    style: TextStyle(fontSize: 15, color: secondaryText),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // --- LOGIN CARD ---
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: Colors.grey.withOpacity(isDarkTheme ? 0.2 : 0.1)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(isDarkTheme ? 0.0 : 0.05),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            _isLogin ? 'Log In' : 'Sign Up',
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: primaryText
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            transitionBuilder: (child, animation) => SizeTransition(sizeFactor: animation, child: child),
+                            child: _isLogin
+                                ? const SizedBox.shrink()
+                                : Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: CustomTextField(
+                                labelText: 'Full Name',
+                                prefixIcon: Icons.person_outline_rounded,
+                                controller: _nameController,
+                                isDark: isDarkTheme,
+                              ),
+                            ),
+                          ),
+
+                          CustomTextField(
+                            labelText: 'Email Address',
+                            prefixIcon: Icons.email_outlined,
+                            controller: _emailController,
+                            isDark: isDarkTheme,
+                            validator: _validateEmail,
+                          ),
+                          const SizedBox(height: 16),
+
+                          CustomTextField(
+                            labelText: 'Password',
+                            prefixIcon: Icons.lock_outline_rounded,
+                            controller: _passwordController,
+                            isDark: isDarkTheme,
+                            validator: _validatePassword,
+                          ),
+
+                          if (_isLogin)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: _loading ? null : _forgotPassword,
+                                child: Text(
+                                  'Forgot password?',
+                                  style: TextStyle(color: brandColor, fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            )
+                          else
+                            const SizedBox(height: 24),
+
+                          ElevatedButton(
+                            onPressed: _loading ? null : _submit,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: brandColor,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 4,
+                              shadowColor: brandColor.withOpacity(0.4),
+                            ),
+                            child: _loading
+                                ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            )
+                                : Text(
+                              _isLogin ? 'Log In' : 'Sign Up',
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  _buildGoogleButton(context, isDarkTheme),
+
+                  const SizedBox(height: 24),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        _isLogin ? 'Welcome back' : 'Create your account',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
+                        _isLogin ? "Don't have an account? " : "Already have an account? ",
+                        style: TextStyle(color: secondaryText),
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        _isLogin
-                            ? 'Log in to continue to the app'
-                            : 'Join now — it only takes a minute',
-                        style: theme.textTheme.bodySmall,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Name (only for sign up) with smooth animation
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 250),
-                        child: _isLogin
-                            ? const SizedBox.shrink()
-                            : CustomTextField(
-                                labelText: 'Full Name',
-                                prefixIcon: Icons.person,
-                                controller: _nameController,
-                                isDark: widget.isDark,
-                              ),
-                      ),
-
-                      if (!_isLogin) const SizedBox(height: 12),
-
-                      CustomTextField(
-                        labelText: 'Email',
-                        prefixIcon: Icons.email,
-                        controller: _emailController,
-                        isDark: widget.isDark,
-                        validator: _validateEmail,
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      CustomTextField(
-                        labelText: 'Password',
-                        prefixIcon: Icons.password,
-                        controller: _passwordController,
-                        isDark: widget.isDark,
-                        validator: _validatePassword,
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      ElevatedButton(
-                        onPressed: _loading ? null : _submit,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: _loading
-                            ? SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(
-                                _isLogin ? 'Log In' : 'Sign Up',
-                                style: TextStyle(
-                                  color: (widget.isDark
-                                      ? Colors.white
-                                      : Colors.black),
-                                ),
-                              ),
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      TextButton(
-                        onPressed: _loading
-                            ? null
-                            : () => setState(() => _isLogin = !_isLogin),
+                      GestureDetector(
+                        onTap: _loading ? null : () => setState(() => _isLogin = !_isLogin),
                         child: Text(
-                          _isLogin
-                              ? "Don't have an account? Sign up"
-                              : 'Already have an account? Log in',
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-                      _buildGoogleButton(context),
-                      const SizedBox(height: 8),
-
-                      if (_isLogin)
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: _loading ? null : _forgotPassword,
-                            child: const Text('Forgot password?'),
+                          _isLogin ? "Sign Up" : "Log In",
+                          style: TextStyle(
+                            color: brandColor,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                            decorationColor: brandColor,
                           ),
                         ),
+                      ),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 20),
+                ],
               ),
             ),
           ),
