@@ -1,29 +1,30 @@
 import 'package:flutter/material.dart' hide MenuController;
 import 'package:provider/provider.dart';
 import 'services/api_service.dart';
-// import 'services/auth_service.dart';
+import 'services/auth_service.dart';
 import 'services/app_service.dart';
-// import 'pages/auth_page.dart';
+import 'pages/auth_page.dart';
 import 'pages/home_page.dart';
 import 'models/themes.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
-  const baseUrl = 'http://10.32.99.85:4000';
+  WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+  final baseUrl = dotenv.env['BASE_URL'] ?? 'http://localhost:4000';
   runApp(
-    // MultiProvider(
-    //   providers: [
-    //     ChangeNotifierProvider(
-    //       create: (_) => AuthService(api: ApiService(baseUrl: baseUrl)),
-    //     ),
-    ChangeNotifierProvider(
-      create: (_) => AppService(api: ApiService(baseUrl: baseUrl)),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => AuthService(api: ApiService(baseUrl: baseUrl)),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AppService(api: ApiService(baseUrl: baseUrl)),
+          child: const MyApp(),
+        ),
+      ],
       child: const MyApp(),
     ),
-    //   ],
-    //   child: const MyApp(),
-    // ),
   );
 }
 
@@ -68,11 +69,7 @@ class _MyApp extends State<MyApp> {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: _isDark ? ThemeMode.dark : ThemeMode.light,
-      // home: AuthGate(
-      //   onToggleTheme: () => setState(() => _isDark = !_isDark),
-      //   isDark: _isDark,
-      // ),
-      home: HomePage(
+      home: AuthGate(
         onToggleTheme: () => setState(() => _isDark = !_isDark),
         isDark: _isDark,
       ),
@@ -80,23 +77,23 @@ class _MyApp extends State<MyApp> {
   }
 }
 
-// class AuthGate extends StatelessWidget {
-//   final VoidCallback onToggleTheme;
-//   final bool isDark;
-//
-//   const AuthGate({
-//     super.key,
-//     required this.onToggleTheme,
-//     required this.isDark,
-//   });
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final auth = context.watch<AuthService>();
-//     if (auth.isLoggedIn) {
-//       return HomePage(onToggleTheme: onToggleTheme, isDark: isDark);
-//     } else {
-//       return AuthPage(onToggleTheme: onToggleTheme, isDark: isDark);
-//     }
-//   }
-// }
+class AuthGate extends StatelessWidget {
+  final VoidCallback onToggleTheme;
+  final bool isDark;
+
+  const AuthGate({
+    super.key,
+    required this.onToggleTheme,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthService>();
+    if (auth.isLoggedIn) {
+      return HomePage(onToggleTheme: onToggleTheme, isDark: isDark);
+    } else {
+      return AuthPage(onToggleTheme: onToggleTheme, isDark: isDark);
+    }
+  }
+}
