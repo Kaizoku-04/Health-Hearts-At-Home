@@ -1,3 +1,4 @@
+import 'dart:async'; // ✅ Required for Timer
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -20,6 +21,7 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
   bool _isInitialized = false;
   bool _hasError = false;
   bool _showControls = true;
+  Timer? _hideTimer; // ✅ Timer to handle auto-hide smoothly
 
   @override
   void initState() {
@@ -34,12 +36,9 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
 
       await controller.initialize();
 
-      // Add listener to update UI for timestamps
+      // Update UI for progress bar smoothness
       controller.addListener(() {
-        // Only rebuild if controls are visible (optimization)
-        if (_showControls && mounted) {
-          setState(() {});
-        }
+        if (mounted && _showControls) setState(() {});
       });
 
       if (mounted) {
@@ -49,20 +48,34 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
       }
     } catch (e) {
       debugPrint('Error initializing video: $e');
-      if (mounted) {
-        setState(() => _hasError = true);
-      }
+      if (mounted) setState(() => _hasError = true);
     }
   }
 
   @override
   void dispose() {
+    _cancelHideTimer(); // ✅ Clean up timer
     final controller = _controller;
     if (controller != null) {
-      if (controller.value.isPlaying) controller.pause();
+      controller.pause();
       controller.dispose();
     }
     super.dispose();
+  }
+
+  // ✅ NEW: Timer Logic
+  void _startHideTimer() {
+    _cancelHideTimer();
+    _hideTimer = Timer(const Duration(seconds: 3), () {
+      if (mounted && _controller?.value.isPlaying == true) {
+        setState(() => _showControls = false);
+      }
+    });
+  }
+
+  void _cancelHideTimer() {
+    _hideTimer?.cancel();
+    _hideTimer = null;
   }
 
   void _togglePlay() {
@@ -72,10 +85,21 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
     setState(() {
       if (controller.value.isPlaying) {
         controller.pause();
-        _showControls = true;
+        _showControls = true; // Always show controls when paused
+        _cancelHideTimer();   // Stop them from hiding
       } else {
         controller.play();
-        _showControls = false;
+        _showControls = true; // Keep visible for a moment
+        _startHideTimer();    // Start countdown to hide
+      }
+    });
+  }
+
+  void _onScreenTap() {
+    setState(() {
+      _showControls = !_showControls;
+      if (_showControls && _controller?.value.isPlaying == true) {
+        _startHideTimer(); // Reset timer if showing controls while playing
       }
     });
   }
@@ -84,20 +108,11 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
     final controller = _controller;
     if (controller == null || !_isInitialized) return;
 
-    final current = controller.value.position;
-    final duration = controller.value.duration;
-
-    // Calculate new position
-    var newPos = current + Duration(seconds: seconds);
-
-    // Clamp between 0 and total duration
-    if (newPos < Duration.zero) newPos = Duration.zero;
-    if (newPos > duration) newPos = duration;
-
+    final newPos = controller.value.position + Duration(seconds: seconds);
     controller.seekTo(newPos);
 
-    // Keep controls visible when seeking
-    setState(() => _showControls = true);
+    // Reset timer so controls don't vanish while seeking
+    if (_showControls) _startHideTimer();
   }
 
   String _formatDuration(Duration duration) {
@@ -113,16 +128,7 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
       return Container(
         height: 220,
         color: Colors.black,
-        child: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, color: Colors.white54, size: 40),
-              SizedBox(height: 8),
-              Text("Video unavailable", style: TextStyle(color: Colors.white54)),
-            ],
-          ),
-        ),
+        child: const Center(child: Icon(Icons.error_outline, color: Colors.white54, size: 40)),
       );
     }
 
@@ -140,9 +146,9 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // 1. Video Layer
+          // 1. Video Layer + Screen Tap
           GestureDetector(
-            onTap: () => setState(() => _showControls = !_showControls),
+            onTap: _onScreenTap,
             child: VideoPlayer(controller),
           ),
 
@@ -153,19 +159,15 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // --- Main Buttons Row (Rewind | Play | Forward) ---
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Rewind 10s
                       IconButton(
                         iconSize: 36,
                         icon: const Icon(Icons.replay_10_rounded, color: Colors.white),
                         onPressed: () => _seekRelative(-10),
                       ),
                       const SizedBox(width: 24),
-
-                      // Play/Pause Button
                       GestureDetector(
                         onTap: _togglePlay,
                         child: Container(
@@ -183,10 +185,7 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
                           ),
                         ),
                       ),
-
                       const SizedBox(width: 24),
-
-                      // Forward 10s
                       IconButton(
                         iconSize: 36,
                         icon: const Icon(Icons.forward_10_rounded, color: Colors.white),
@@ -198,7 +197,7 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
               ),
             ),
 
-          // 3. Bottom Bar (Progress + Timestamp)
+          // 3. Bottom Bar
           if (_showControls)
             Positioned(
               bottom: 0,
@@ -215,7 +214,6 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
                 ),
                 child: Row(
                   children: [
-                    // Play/Pause Icon Small
                     GestureDetector(
                       onTap: _togglePlay,
                       child: Icon(
@@ -225,16 +223,11 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
                       ),
                     ),
                     const SizedBox(width: 8),
-
-                    // Progress Text (e.g., 01:20 / 03:45)
                     Text(
                       "${_formatDuration(controller.value.position)} / ${_formatDuration(controller.value.duration)}",
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
-
                     const SizedBox(width: 12),
-
-                    // Progress Bar
                     Expanded(
                       child: VideoProgressIndicator(
                         controller,
