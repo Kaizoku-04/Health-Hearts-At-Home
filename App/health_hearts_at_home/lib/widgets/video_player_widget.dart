@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import '../models/themes.dart';
 
 class CustomVideoPlayer extends StatefulWidget {
   final String videoUrl;
   final String title;
-  final bool autoPlay;
 
   const CustomVideoPlayer({
     super.key,
     required this.videoUrl,
     required this.title,
-    this.autoPlay = true,
   });
 
   @override
@@ -19,195 +16,169 @@ class CustomVideoPlayer extends StatefulWidget {
 }
 
 class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
-  late VideoPlayerController _controller;
-  late Future<void> _initializeVideoPlayerFuture;
-  bool _isPlaying = false;
+  // ✅ FIX 1: Make controller nullable to avoid LateInitializationError
+  VideoPlayerController? _controller;
+  bool _isInitialized = false;
+  bool _hasError = false;
   bool _showControls = true;
 
   @override
   void initState() {
     super.initState();
-    // Initialize video controller
-    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
-      ..addListener(() {
+    _initializeVideo();
+  }
+
+  Future<void> _initializeVideo() async {
+    try {
+      // Create the controller
+      final controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl));
+
+      // Assign it to state variable
+      _controller = controller;
+
+      await controller.initialize();
+
+      // ✅ FIX 2: Check mounted before setState (prevents crash if user left already)
+      if (mounted) {
         setState(() {
-          _isPlaying = _controller.value.isPlaying;
+          _isInitialized = true;
         });
-      });
-
-    _initializeVideoPlayerFuture = _controller.initialize();
-
-    // Auto-play if set
-    if (widget.autoPlay) {
-      _controller.play();
+      }
+    } catch (e) {
+      debugPrint('Error initializing video: $e');
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+        });
+      }
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    // ✅ FIX 3: safe dispose logic
+    final controller = _controller;
+    if (controller != null) {
+      // Stop playback to prevent audio leak or background playing
+      if (controller.value.isPlaying) {
+        controller.pause();
+      }
+      controller.dispose();
+    }
     super.dispose();
+  }
+
+  void _togglePlay() {
+    final controller = _controller;
+    if (controller == null || !_isInitialized) return;
+
+    setState(() {
+      if (controller.value.isPlaying) {
+        controller.pause();
+        _showControls = true;
+      } else {
+        controller.play();
+        _showControls = false;
+
+        // Auto-hide controls
+        Future.delayed(const Duration(seconds: 2), () {
+          // ✅ FIX 4: Safety checks inside async delay
+          if (mounted && controller.value.isPlaying) {
+            setState(() => _showControls = false);
+          }
+        });
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<void>(
-      future: _initializeVideoPlayerFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+    if (_hasError) {
+      return Container(
+        height: 220,
+        color: Colors.black,
+        child: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Video player with controls
-              GestureDetector(
-                onTap: () => setState(() => _showControls = !_showControls),
-                child: Container(
-                  color: Colors.black,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      AspectRatio(
-                        aspectRatio: _controller.value.aspectRatio,
-                        child: VideoPlayer(_controller),
-                      ),
-                      if (_showControls)
-                        Container(
-                          color: Colors.black26,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              // Play/Pause button
-                              FloatingActionButton(
-                                mini: true,
-                                backgroundColor: customTheme[500],
-                                onPressed: () {
-                                  setState(() {
-                                    _isPlaying
-                                        ? _controller.pause()
-                                        : _controller.play();
-                                  });
-                                },
-                                child: Icon(
-                                  _isPlaying ? Icons.pause : Icons.play_arrow,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              // Seek backward
-                              FloatingActionButton(
-                                mini: true,
-                                backgroundColor: customTheme[500],
-                                onPressed: () {
-                                  _controller.seekTo(
-                                    _controller.value.position -
-                                        const Duration(seconds: 10),
-                                  );
-                                },
-                                child: const Icon(
-                                  Icons.replay_10,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              // Seek forward
-                              FloatingActionButton(
-                                mini: true,
-                                backgroundColor: customTheme[500],
-                                onPressed: () {
-                                  _controller.seekTo(
-                                    _controller.value.position +
-                                        const Duration(seconds: 10),
-                                  );
-                                },
-                                child: const Icon(
-                                  Icons.forward_10,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              // Video progress bar
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: VideoProgressIndicator(
-                  _controller,
-                  allowScrubbing: true,
-                  colors: VideoProgressColors(
-                    playedColor: customTheme[500]!,
-                    bufferedColor: Colors.grey[300]!,
-                    backgroundColor: Colors.grey[200]!,
-                  ),
-                ),
-              ),
-              // Duration info
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(_formatDuration(_controller.value.position)),
-                    Text(_formatDuration(_controller.value.duration)),
-                  ],
-                ),
-              ),
+              Icon(Icons.error_outline, color: Colors.white54, size: 40),
+              SizedBox(height: 8),
+              Text("Video unavailable", style: TextStyle(color: Colors.white54)),
             ],
-          );
-        } else if (snapshot.hasError) {
-          return Container(
-            color: Colors.black,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, color: Colors.red, size: 48),
-                const SizedBox(height: 16),
-                const Text(
-                  'Error loading video',
-                  style: TextStyle(color: Colors.white),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _initializeVideoPlayerFuture = _controller.initialize();
-                    });
-                  },
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
-        } else {
-          return Container(
-            color: Colors.black,
-            child: const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation(Colors.white),
-                ),
-                SizedBox(height: 16),
-                Text('Loading video...', style: TextStyle(color: Colors.white)),
-              ],
-            ),
-          );
-        }
-      },
-    );
-  }
-
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final hours = twoDigits(duration.inHours);
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-
-    if (duration.inHours == 0) {
-      return '$minutes:$seconds';
-    } else {
-      return '$hours:$minutes:$seconds';
+          ),
+        ),
+      );
     }
+
+    // Safely unwrap controller for UI usage
+    final controller = _controller;
+
+    if (!_isInitialized || controller == null) {
+      return Container(
+        height: 220,
+        color: Colors.black,
+        child: const Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      );
+    }
+
+    return AspectRatio(
+      aspectRatio: controller.value.aspectRatio,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // 1. Video
+          GestureDetector(
+            onTap: () {
+              setState(() => _showControls = !_showControls);
+            },
+            child: VideoPlayer(controller),
+          ),
+
+          // 2. Play/Pause Overlay
+          if (_showControls || !controller.value.isPlaying)
+            GestureDetector(
+              onTap: _togglePlay,
+              child: Container(
+                color: Colors.black.withOpacity(0.3),
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      controller.value.isPlaying
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded,
+                      color: Colors.white,
+                      size: 40,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          // 3. Progress Bar
+          if (_showControls)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: VideoProgressIndicator(
+                controller,
+                allowScrubbing: true,
+                colors: const VideoProgressColors(
+                  playedColor: Color(0xFF2A9D8F),
+                  bufferedColor: Colors.white24,
+                  backgroundColor: Colors.grey,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }
