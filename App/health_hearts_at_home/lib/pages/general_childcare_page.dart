@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:health_hearts_at_home/pages/sleep_rest_page.dart';
 import 'package:provider/provider.dart';
 import '../services/app_service.dart';
 import '../services/localization_service.dart';
+import 'activity_play_page.dart';
+import 'immunization_page.dart';
+import 'nutrition_page.dart'; // ✅ Make sure this is imported
 
 class GeneralChildcarePage extends StatelessWidget {
-  final bool isDark; // Kept for consistency, but we check dynamically
+  final bool isDark;
   final VoidCallback onToggleTheme;
 
   const GeneralChildcarePage({
@@ -19,46 +23,44 @@ class GeneralChildcarePage extends StatelessWidget {
     final lang = appService.currentLanguage;
 
     // --- DYNAMIC THEME CHECK ---
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
 
     // --- NEUTRAL PLATINUM PALETTE ---
-    final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF5F5F7);
-    final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-    final primaryText = isDark ? Colors.white : const Color(0xFF1D1D1F);
-    final secondaryText = isDark ? const Color(0xFFBDBDBD) : const Color(0xFF5A5A60);
+    final bgColor = isDarkTheme ? const Color(0xFF121212) : const Color(0xFFE7E7EC);
+    final cardColor = isDarkTheme ? const Color(0xFF1E1E1E) : Colors.white;
+    final primaryText = isDarkTheme ? Colors.white : const Color(0xFF1D1D1F);
+    final secondaryText = isDarkTheme ? const Color(0xFFBDBDBD) : const Color(0xFF5A5A60);
 
-    // Accent Color: Burnt Sienna (Matches Home Page "General Childcare" Icon)
+    // Accent Color: Burnt Sienna
     const accentColor = Color(0xFFE76F51);
 
-    // Enhanced Data with Icons
     final childcareItems = [
       {
         'title': lang == 'en' ? 'Nutrition & Diet' : 'التغذية والحمية',
-        'description': lang == 'en'
-            ? 'Proper nutrition guides for CHD'
-            : 'دليل التغذية السليمة لأمراض القلب',
+        'description': lang == 'en' ? 'Proper nutrition guides for CHD' : 'دليل التغذية السليمة لأمراض القلب',
         'icon': Icons.restaurant_rounded,
+        'page': NutritionPage(isDark: isDarkTheme, onToggleTheme: onToggleTheme),
       },
       {
         'title': lang == 'en' ? 'Sleep & Rest' : 'النوم والراحة',
-        'description': lang == 'en'
-            ? 'Ensuring quality sleep'
-            : 'ضمان نوم وراحة جيدة',
+        'description': lang == 'en' ? 'Ensuring quality sleep' : 'ضمان نوم وراحة جيدة',
         'icon': Icons.bedtime_rounded,
+        // Linking to Placeholder for now
+        'page': SleepRestPage(isDark: isDarkTheme, onToggleTheme: onToggleTheme),
       },
       {
         'title': lang == 'en' ? 'Activity & Play' : 'النشاط واللعب',
-        'description': lang == 'en'
-            ? 'Age-appropriate activities'
-            : 'أنشطة مناسبة لعمر الطفل',
+        'description': lang == 'en' ? 'Age-appropriate activities' : 'أنشطة مناسبة لعمر الطفل',
         'icon': Icons.toys_rounded,
+        // Linking to Placeholder for now
+        'page': ActivityPlayPage(isDark: isDarkTheme, onToggleTheme: onToggleTheme),
       },
       {
         'title': lang == 'en' ? 'Immunization' : 'التطعيمات',
-        'description': lang == 'en'
-            ? 'Vaccination schedules'
-            : 'جدول التطعيمات',
+        'description': lang == 'en' ? 'Vaccination schedules' : 'جدول التطعيمات',
         'icon': Icons.vaccines,
+        // Linking to Placeholder for now
+        'page': ImmunizationPage(isDark: isDarkTheme, onToggleTheme: onToggleTheme),
       },
     ];
 
@@ -81,22 +83,16 @@ class GeneralChildcarePage extends StatelessWidget {
           ),
         ),
         actions: [
-          // --- LANGUAGE TOGGLE ---
           IconButton(
             icon: const Icon(Icons.language),
             color: primaryText,
-            tooltip: 'Change Language',
             onPressed: () {
               final newLang = lang == 'en' ? 'ar' : 'en';
               appService.setLanguage(newLang);
             },
           ),
-          // --- THEME TOGGLE ---
           IconButton(
-            icon: Icon(
-              isDark ? Icons.light_mode : Icons.dark_mode,
-              color: primaryText,
-            ),
+            icon: Icon(isDarkTheme ? Icons.light_mode : Icons.dark_mode, color: primaryText),
             onPressed: onToggleTheme,
           ),
         ],
@@ -115,9 +111,13 @@ class GeneralChildcarePage extends StatelessWidget {
             primaryText: primaryText,
             secondaryText: secondaryText,
             accentColor: accentColor,
-            isDark: isDark,
+            isDark: isDarkTheme,
             onTap: () {
-              // Navigate to detailed view
+              // ✅ NAVIGATION LOGIC
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => item['page'] as Widget),
+              );
             },
           );
         },
@@ -125,7 +125,6 @@ class GeneralChildcarePage extends StatelessWidget {
     );
   }
 
-  // --- HELPER: SOPHISTICATED LIST CARD ---
   Widget _buildSophisticatedCard({
     required String title,
     required String description,
@@ -161,7 +160,6 @@ class GeneralChildcarePage extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             child: Row(
               children: [
-                // Icon Box
                 Container(
                   width: 50,
                   height: 50,
@@ -172,36 +170,16 @@ class GeneralChildcarePage extends StatelessWidget {
                   child: Icon(icon, color: accentColor, size: 26),
                 ),
                 const SizedBox(width: 16),
-
-                // Text Content
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: primaryText,
-                        ),
-                      ),
+                      Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: primaryText)),
                       const SizedBox(height: 4),
-                      Text(
-                        description,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: secondaryText,
-                          height: 1.4,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      Text(description, style: TextStyle(fontSize: 13, color: secondaryText, height: 1.4), maxLines: 2, overflow: TextOverflow.ellipsis),
                     ],
                   ),
                 ),
-
-                // Chevron
                 const SizedBox(width: 12),
                 Icon(Icons.chevron_right, color: Colors.grey.withOpacity(0.4), size: 24),
               ],
